@@ -2,6 +2,7 @@ import ReactDOM from "react-dom/client";
 
 import App from "./App";
 import "./globals.css";
+import "./styles/handdrawn.css";
 import "./i18n";
 import { initializeLoopbackRuntimeHost } from "./lib/runtime";
 

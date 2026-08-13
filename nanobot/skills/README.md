@@ -29,3 +29,4 @@ The skill format and metadata structure follow OpenClaw's conventions to maintai
 | `tmux` | Remote-control tmux sessions |
 | `clawhub` | Search and install skills from ClawHub registry |
 | `skill-creator` | Create new skills |
+| `weread-skills` | WeChat Reading (微信读书) assistant — search, shelf, notes, reviews, stats |

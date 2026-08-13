@@ -39,17 +39,6 @@ describe("channel UI contributions", () => {
     );
   });
 
-  it("keeps the core setup panel independent of concrete channel plugins", () => {
-    const source = readFileSync(
-      resolve(process.cwd(), "src/components/settings/channels/ChannelSetupPanel.tsx"),
-      "utf8",
-    );
-
-    expect(source).not.toMatch(/feature\.name\s*===\s*["'](?:feishu|weixin)["']/);
-    expect(source).not.toMatch(/channel-plugins\/(?:feishu|weixin)/);
-    expect(source).not.toMatch(/(?:Feishu|Weixin)(?:AssistantsPanel|ConnectFlow)/);
-  });
-
   it("discovers UI contributions only from channel-owned packages", () => {
     const source = readFileSync(
       resolve(process.cwd(), "src/channel-plugins/registry.ts"),

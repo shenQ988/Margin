@@ -116,6 +116,13 @@ from nanobot.webui.skills_marketplace import (
 )
 from nanobot.webui.thread_disk import delete_webui_thread
 from nanobot.webui.transcript import build_webui_thread_response
+from nanobot.webui.weread_api import (
+    WeReadError,
+    fetch_notebooks,
+    fetch_shelf_enriched,
+    normalize_notebooks,
+    weread_configured,
+)
 from nanobot.webui.workspaces import WebUIWorkspaceController
 
 _SLOW_WEBUI_HTTP_LOG_MS = 1_000
@@ -496,6 +503,11 @@ class GatewayHTTPHandler:
 
         # Misc routes
         response = await self._dispatch_misc_routes(connection, request, got)
+        if response is not None:
+            return response
+
+        # WeRead routes
+        response = await self._dispatch_weread_routes(request, got)
         if response is not None:
             return response
 
@@ -1067,6 +1079,46 @@ class GatewayHTTPHandler:
         if got == "/api/webui/sidebar-state/update":
             return self._handle_webui_sidebar_state_update(request)
         return None
+
+    # -- WeRead routes --------------------------------------------------------
+
+    async def _dispatch_weread_routes(self, request: WsRequest, got: str) -> Response | None:
+        if got == "/api/weread/status":
+            return self._handle_weread_status(request)
+        if got == "/api/weread/shelf":
+            return await self._handle_weread_shelf(request)
+        if got == "/api/weread/notes":
+            return await self._handle_weread_notes(request)
+        return None
+
+    def _handle_weread_status(self, request: WsRequest) -> Response:
+        if not self.check_api_token(request):
+            return _http_error(401, "Unauthorized")
+        return _http_json_response({"configured": weread_configured()})
+
+    async def _handle_weread_shelf(self, request: WsRequest) -> Response:
+        if not self.check_api_token(request):
+            return _http_error(401, "Unauthorized")
+        try:
+            payload = await fetch_shelf_enriched()
+        except WeReadError as exc:
+            return _http_error(exc.status, exc.message)
+        except Exception:
+            self._log.exception("weread shelf fetch failed")
+            return _http_error(500, "weread shelf fetch failed")
+        return _http_json_response(payload)
+
+    async def _handle_weread_notes(self, request: WsRequest) -> Response:
+        if not self.check_api_token(request):
+            return _http_error(401, "Unauthorized")
+        try:
+            payload = await fetch_notebooks()
+        except WeReadError as exc:
+            return _http_error(exc.status, exc.message)
+        except Exception:
+            self._log.exception("weread notebooks fetch failed")
+            return _http_error(500, "weread notebooks fetch failed")
+        return _http_json_response(normalize_notebooks(payload))
 
     def _handle_commands(self, request: WsRequest) -> Response:
         if not self.check_api_token(request):

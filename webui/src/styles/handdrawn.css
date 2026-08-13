@@ -1,0 +1,189 @@
+/* 全局基础配置 蜡笔手绘风格 手机竖屏
+   Hand-drawn/crayon design system for the WeRead reading-agent screens
+   (Shelf / Notes / Settings). Pure CSS only — no images/icons/SVG assets.
+   Ask-Book (chat) keeps the app's normal design and isn't scoped by this file. */
+
+:root {
+  --cream-bg: #f5efe4;
+  --book-yellow: #e8c268; /* 在读 Reading */
+  --book-paper: #f8f3e9; /* 待读 To-Read */
+  --book-grey: #b8b8b8; /* 已读完 Finished */
+  --crayon-black: #222222;
+}
+
+/* Page-level box model from the spec's `body` rule, scoped to `.hd-shell`
+   (the AppShell root) instead of the real `<body>`, since `<body>` already
+   carries this app's own base styles for every other screen (auth, etc.). */
+.hd-shell {
+  font-family: "Quicksand", sans-serif;
+  background: var(--cream-bg);
+  color: var(--crayon-black);
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100%;
+}
+
+.hd-shell,
+.hd-shell * {
+  box-sizing: border-box;
+}
+
+/* 顶部头部栏 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 16px 0;
+  margin-bottom: 30px;
+}
+
+.header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.header-btn {
+  border: 2.5px solid var(--crayon-black);
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  margin-left: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.header-btn:active {
+  transform: scale(0.97);
+}
+
+/* 纯CSS绘制 蜡笔书堆Logo 无任何图片 */
+.crayon-logo {
+  position: relative;
+  width: 42px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.crayon-logo .book {
+  position: absolute;
+  height: 8px;
+  border: 2px solid #222;
+  border-radius: 3px;
+}
+
+.crayon-logo .b1 {
+  width: 34px;
+  background: #e8c268;
+  top: 4px;
+  left: 0;
+  transform: rotate(-6deg);
+}
+
+.crayon-logo .b2 {
+  width: 30px;
+  background: #d9c8b4;
+  top: 12px;
+  left: 4px;
+  transform: rotate(4deg);
+}
+
+.crayon-logo .b3 {
+  width: 26px;
+  background: #f8f3e9;
+  top: 20px;
+  left: 8px;
+  transform: rotate(-2deg);
+}
+
+/* 书架容器 单列纵向排布 */
+.shelf-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0 16px 80px;
+}
+
+/* 可点击书本卡片 蜡笔粗黑边框 */
+.book-item {
+  width: 100%;
+  height: 70px;
+  border: 3px solid var(--crayon-black);
+  border-radius: 10px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.book-item:active {
+  transform: scale(0.97);
+}
+
+/* 书本三种状态颜色 */
+.reading {
+  background: var(--book-yellow);
+}
+
+.toread {
+  background: var(--book-paper);
+}
+
+.finished {
+  background: var(--book-grey);
+}
+
+.book-name {
+  font-size: 16px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-info {
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* 底部固定导航栏 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 430px;
+  max-width: 100vw;
+  background: var(--cream-bg);
+  display: flex;
+  justify-content: space-around;
+  padding: 14px 0;
+  border-top: 2px solid rgba(34, 34, 34, 0.15);
+}
+
+.nav-item {
+  cursor: pointer;
+  font-size: 14px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  color: var(--crayon-black);
+}
+
+.nav-item[aria-selected="true"] {
+  font-weight: 700;
+}

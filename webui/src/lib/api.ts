@@ -423,6 +423,95 @@ export async function deleteSession(
   );
 }
 
+export interface WeReadShelfItem {
+  kind: "book" | "album" | "mp";
+  id: string;
+  title: string;
+  author: string | null;
+  cover: string | null;
+  category: string | null;
+  finished: boolean;
+  top: boolean;
+  deepLink: string | null;
+  updateTime: number | null;
+  status: "reading" | "toread" | "finished";
+  progress: number | null;
+  hasNote: boolean;
+}
+
+export interface WeReadShelfPayload {
+  configured: boolean;
+  items: WeReadShelfItem[];
+  count: number;
+}
+
+export interface WeReadStatusPayload {
+  configured: boolean;
+}
+
+export interface WeReadNoteItem {
+  bookId: string;
+  title: string;
+  author: string | null;
+  cover: string | null;
+  reviewCount: number;
+  noteCount: number;
+  bookmarkCount: number;
+  totalNotes: number;
+  readingProgress: number | null;
+  markedStatus: number | null;
+}
+
+export interface WeReadNotesPayload {
+  configured: boolean;
+  items: WeReadNoteItem[];
+  count: number;
+}
+
+export async function fetchWeReadStatus(
+  token: string,
+  base: string = "",
+): Promise<WeReadStatusPayload> {
+  return request<WeReadStatusPayload>(
+    `${base}/api/weread/status`,
+    token,
+    undefined,
+    API_READ_TIMEOUT_MS,
+  );
+}
+
+// The backend bounds shelf enrichment (notes + progress lookups) to ~15s
+// worst case (see _NOTEBOOKS_TIMEOUT_S/_PROGRESS_TIMEOUT_S in
+// nanobot/webui/weread_api.py) specifically so it finishes before this
+// client-side timeout — letting the browser abandon the connection while the
+// backend is still writing a response causes a race there. Keep this above
+// that backend bound with real margin if either changes.
+const WEREAD_FETCH_TIMEOUT_MS = 20_000;
+
+export async function fetchWeReadShelf(
+  token: string,
+  base: string = "",
+): Promise<WeReadShelfPayload> {
+  return request<WeReadShelfPayload>(
+    `${base}/api/weread/shelf`,
+    token,
+    undefined,
+    WEREAD_FETCH_TIMEOUT_MS,
+  );
+}
+
+export async function fetchWeReadNotes(
+  token: string,
+  base: string = "",
+): Promise<WeReadNotesPayload> {
+  return request<WeReadNotesPayload>(
+    `${base}/api/weread/notes`,
+    token,
+    undefined,
+    WEREAD_FETCH_TIMEOUT_MS,
+  );
+}
+
 export async function fetchSettings(
   token: string,
   base: string = "",
