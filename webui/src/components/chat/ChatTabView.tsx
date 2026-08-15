@@ -68,6 +68,7 @@ export function ChatTabView({
       onCreateChat={handleCreateChat}
       theme={theme}
       onToggleTheme={onToggleTheme}
+      hideThemeButton
     />
   );
 }

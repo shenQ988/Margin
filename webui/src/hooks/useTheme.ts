@@ -4,22 +4,11 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState,
   type ReactNode,
 } from "react";
 
 type Theme = "light" | "dark";
-const STORAGE_KEY = "nanobot-webui.theme";
 const ThemeContext = createContext<Theme>("light");
-
-function readStored(): Theme | null {
-  try {
-    const v = localStorage.getItem(STORAGE_KEY);
-    return v === "light" || v === "dark" ? v : null;
-  } catch {
-    return null;
-  }
-}
 
 function applyTheme(theme: Theme): void {
   const root = document.documentElement;
@@ -27,36 +16,23 @@ function applyTheme(theme: Theme): void {
   else root.classList.remove("dark");
 }
 
+// Dark mode is disabled app-wide (Ask-Book and Setting both dropped their
+// toggle) — this always resolves to "light" and never reads/writes stored or
+// system-preference theme. `toggle`/`setTheme` are kept as no-ops so callers
+// that still hold onto them (tests, ThreadShell's optional prop) don't break.
 export function useTheme(): {
   theme: Theme;
   toggle: () => void;
   setTheme: (t: Theme) => void;
 } {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const stored = readStored();
-    if (stored) return stored;
-    if (typeof window !== "undefined" && window.matchMedia) {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    }
-    return "light";
-  });
+  const theme: Theme = "light";
 
   useEffect(() => {
     applyTheme(theme);
-    try {
-      localStorage.setItem(STORAGE_KEY, theme);
-    } catch {
-      // ignore
-    }
   }, [theme]);
 
-  const setTheme = useCallback((t: Theme) => setThemeState(t), []);
-  const toggle = useCallback(
-    () => setThemeState((t) => (t === "dark" ? "light" : "dark")),
-    [],
-  );
+  const setTheme = useCallback((_t: Theme) => {}, []);
+  const toggle = useCallback(() => {}, []);
   return { theme, toggle, setTheme };
 }
 

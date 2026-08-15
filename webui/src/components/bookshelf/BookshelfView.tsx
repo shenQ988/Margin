@@ -44,14 +44,13 @@ export function BookshelfView() {
 
   return (
     <>
+      <div className="bookshelf-hero">
+        <img src="/bookshelf/bookshelf_bg.png" alt="Hand-drawn illustrated bookshelf" />
+      </div>
+
       <header className="header">
         <div className="header-title-wrap">
-          <div className="crayon-logo" aria-hidden="true">
-            <span className="book b1" />
-            <span className="book b2" />
-            <span className="book b3" />
-          </div>
-          <h1>My Reading Agent</h1>
+          <h1>My Shelf</h1>
         </div>
         <div>
           <button type="button" className="header-btn" onClick={() => void load()}>
@@ -75,23 +74,19 @@ export function BookshelfView() {
       {state.status === "loading" ? (
         <p style={{ textAlign: "center", fontSize: 14 }}>Loading your shelf...</p>
       ) : state.status === "not-configured" ? (
-        <div className="shelf-container">
-          <div className="book-item toread" style={{ height: "auto", flexDirection: "column", alignItems: "flex-start", gap: 4, padding: 14 }}>
-            <span className="book-name">WeRead is not connected</span>
-            <span style={{ fontSize: 13 }}>
-              Set the WEREAD_API_KEY environment variable and restart nanobot gateway to see your bookshelf.
-            </span>
-          </div>
+        <div style={{ margin: "0 16px", padding: 14, border: "3px solid var(--crayon-black)", borderRadius: 10, background: "var(--book-paper)", display: "flex", flexDirection: "column", gap: 4 }}>
+          <span className="book-title">WeRead is not connected</span>
+          <span style={{ fontSize: 13 }}>
+            Set the WEREAD_API_KEY environment variable and restart nanobot gateway to see your bookshelf.
+          </span>
         </div>
       ) : state.status === "error" ? (
-        <div className="shelf-container">
-          <div className="book-item toread" style={{ height: "auto", flexDirection: "column", alignItems: "flex-start", gap: 4, padding: 14 }}>
-            <span className="book-name">Couldn't load your shelf</span>
-            <span style={{ fontSize: 13 }}>{state.message}</span>
-            <button type="button" className="header-btn" onClick={() => void load()}>
-              Retry
-            </button>
-          </div>
+        <div style={{ margin: "0 16px", padding: 14, border: "3px solid var(--crayon-black)", borderRadius: 10, background: "var(--book-paper)", display: "flex", flexDirection: "column", gap: 4 }}>
+          <span className="book-title">Couldn't load your shelf</span>
+          <span style={{ fontSize: 13 }}>{state.message}</span>
+          <button type="button" className="header-btn" onClick={() => void load()} style={{ alignSelf: "flex-start" }}>
+            Retry
+          </button>
         </div>
       ) : filteredItems.length === 0 ? (
         <p style={{ textAlign: "center", fontSize: 14 }}>

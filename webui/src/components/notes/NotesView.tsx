@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { NoteDetailView } from "@/components/notes/NoteDetailView";
 import { fetchWeReadNotes, fetchWeReadStatus, type WeReadNoteItem } from "@/lib/api";
 import { useClient } from "@/providers/ClientProvider";
 
@@ -12,6 +13,7 @@ type LoadState =
 export function NotesView() {
   const { getToken } = useClient();
   const [state, setState] = useState<LoadState>({ status: "loading" });
+  const [selected, setSelected] = useState<{ bookId: string; title: string } | null>(null);
 
   const load = useCallback(async () => {
     setState({ status: "loading" });
@@ -32,6 +34,16 @@ export function NotesView() {
     void load();
   }, [load]);
 
+  if (selected) {
+    return (
+      <NoteDetailView
+        bookId={selected.bookId}
+        fallbackTitle={selected.title}
+        onBack={() => setSelected(null)}
+      />
+    );
+  }
+
   return (
     <>
       <header className="header">
@@ -48,41 +60,38 @@ export function NotesView() {
       {state.status === "loading" ? (
         <p style={{ textAlign: "center", fontSize: 14 }}>Loading your notes...</p>
       ) : state.status === "not-configured" ? (
-        <div className="shelf-container">
-          <div className="book-item toread" style={{ height: "auto", flexDirection: "column", alignItems: "flex-start", gap: 4, padding: 14 }}>
-            <span className="book-name">WeRead is not connected</span>
-            <span style={{ fontSize: 13 }}>
-              Set the WEREAD_API_KEY environment variable and restart nanobot gateway to see your notes.
-            </span>
-          </div>
+        <div style={{ margin: "0 16px", padding: 14, border: "3px solid var(--crayon-black)", borderRadius: 10, background: "var(--book-paper)", display: "flex", flexDirection: "column", gap: 4 }}>
+          <span className="book-title">WeRead is not connected</span>
+          <span style={{ fontSize: 13 }}>
+            Set the WEREAD_API_KEY environment variable and restart nanobot gateway to see your notes.
+          </span>
         </div>
       ) : state.status === "error" ? (
-        <div className="shelf-container">
-          <div className="book-item toread" style={{ height: "auto", flexDirection: "column", alignItems: "flex-start", gap: 4, padding: 14 }}>
-            <span className="book-name">Couldn't load your notes</span>
-            <span style={{ fontSize: 13 }}>{state.message}</span>
-            <button type="button" className="header-btn" onClick={() => void load()}>
-              Retry
-            </button>
-          </div>
+        <div style={{ margin: "0 16px", padding: 14, border: "3px solid var(--crayon-black)", borderRadius: 10, background: "var(--book-paper)", display: "flex", flexDirection: "column", gap: 4 }}>
+          <span className="book-title">Couldn't load your notes</span>
+          <span style={{ fontSize: 13 }}>{state.message}</span>
+          <button type="button" className="header-btn" onClick={() => void load()} style={{ alignSelf: "flex-start" }}>
+            Retry
+          </button>
         </div>
       ) : state.items.length === 0 ? (
         <p style={{ textAlign: "center", fontSize: 14 }}>You don't have any notes yet.</p>
       ) : (
-        <div className="shelf-container">
+        <div className="note-list">
           {state.items.map((item) => (
-            <div
+            <button
+              type="button"
               key={item.bookId}
-              className="book-item toread"
-              style={{ height: "auto", flexDirection: "column", alignItems: "flex-start", gap: 2, padding: "10px 14px" }}
+              className="note-item"
+              onClick={() => setSelected({ bookId: item.bookId, title: item.title ?? "" })}
             >
-              <span className="book-name">{item.title}</span>
+              <span className="book-title">{item.title}</span>
               {item.author ? <span style={{ fontSize: 12 }}>{item.author}</span> : null}
               <span style={{ fontSize: 12 }}>
                 {item.totalNotes} notes · {item.reviewCount} thoughts · {item.noteCount} highlights ·{" "}
                 {item.bookmarkCount} bookmarks
               </span>
-            </div>
+            </button>
           ))}
         </div>
       )}

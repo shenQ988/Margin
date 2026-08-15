@@ -9,13 +9,14 @@
   --book-paper: #f8f3e9; /* 待读 To-Read */
   --book-grey: #b8b8b8; /* 已读完 Finished */
   --crayon-black: #222222;
+  --bottom-nav-height: 60px;
 }
 
 /* Page-level box model from the spec's `body` rule, scoped to `.hd-shell`
    (the AppShell root) instead of the real `<body>`, since `<body>` already
    carries this app's own base styles for every other screen (auth, etc.). */
 .hd-shell {
-  font-family: "Quicksand", sans-serif;
+  font-family: "Lora", Georgia, serif;
   background: var(--cream-bg);
   color: var(--crayon-black);
   max-width: 430px;
@@ -26,6 +27,26 @@
 .hd-shell,
 .hd-shell * {
   box-sizing: border-box;
+}
+
+/* Illustrated bookshelf banner, top of the Shelf tab. The source PNG is a
+   transparent cutout of just the illustration (pre-cropped/trimmed), so it's
+   sized by its own aspect ratio and shown in full (object-fit: contain)
+   rather than cropped — the page's own cream background shows through the
+   transparent parts, so there's no visible seam. It scrolls with the rest
+   of the shelf content rather than staying pinned. */
+.bookshelf-hero {
+  width: 100%;
+  aspect-ratio: 860 / 514;
+  flex-shrink: 0;
+}
+
+.bookshelf-hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: top center;
 }
 
 /* 顶部头部栏 */
@@ -102,67 +123,222 @@
   transform: rotate(-2deg);
 }
 
-/* 书架容器 单列纵向排布 */
+/* 书架容器 WeRead 风格网格 每行三本 */
 .shelf-container {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 14px;
   padding: 0 16px 80px;
 }
 
-/* 可点击书本卡片 蜡笔粗黑边框 */
-.book-item {
-  width: 100%;
-  height: 70px;
-  border: 3px solid var(--crayon-black);
-  border-radius: 10px;
-  padding: 0 14px;
+/* 可点击书本卡片 封面 + 标题 */
+.book-card {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
   transition: 0.2s;
   font-family: inherit;
   text-align: left;
 }
 
-.book-item:active {
+.book-card:active {
   transform: scale(0.97);
 }
 
-/* 书本三种状态颜色 */
-.reading {
+.book-cover {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4.2;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(34, 34, 34, 0.25);
+}
+
+.book-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Fallback cover colors, only used when WeRead didn't return a cover image */
+.book-cover.reading {
   background: var(--book-yellow);
 }
 
-.toread {
+.book-cover.toread {
   background: var(--book-paper);
 }
 
-.finished {
+.book-cover.finished {
   background: var(--book-grey);
 }
 
-.book-name {
-  font-size: 16px;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.book-info {
-  margin-left: auto;
-  padding-left: 8px;
-  font-size: 12px;
+.book-cover-fallback {
   display: flex;
   align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  overflow: hidden;
+}
+
+.book-cover-note {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 12px;
+  color: var(--book-yellow);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+.book-cover-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px 4px;
+  font-size: 10px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  text-align: center;
+}
+
+.book-title {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.book-status {
+  font-size: 11px;
+  color: rgba(34, 34, 34, 0.6);
+}
+
+/* 笔记本列表 单本书一行 可点击进入详情 */
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 16px 80px;
+}
+
+.note-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  border: 3px solid var(--crayon-black);
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--book-paper);
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.note-item:active {
+  transform: scale(0.97);
+}
+
+/* 单本书笔记详情 划线/想法卡片列表 */
+.quote-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 16px 80px;
+}
+
+.quote-card {
+  border: 3px solid var(--crayon-black);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--book-paper);
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  flex-shrink: 0;
+}
+
+.quote-chapter {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(34, 34, 34, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.quote-text,
+.quote-original {
+  font-size: 14px;
+  line-height: 1.5;
+  border-left: 3px solid var(--book-yellow);
+  padding-left: 10px;
+}
+
+.quote-thought {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 设置页 每项单独一行 */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 16px 80px;
+}
+
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  border: 3px solid var(--crayon-black);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--book-paper);
+  font-family: inherit;
+  text-align: left;
+}
+
+.settings-row-action {
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.settings-row-action:active {
+  transform: scale(0.97);
+}
+
+.settings-row-label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-row-value {
+  font-size: 13px;
+  color: rgba(34, 34, 34, 0.7);
 }
 
 /* 底部固定导航栏 */
 .bottom-nav {
   position: fixed;
+  z-index: 50;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);

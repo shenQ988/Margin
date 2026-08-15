@@ -468,6 +468,28 @@ export interface WeReadNotesPayload {
   count: number;
 }
 
+export interface WeReadBookNoteQuoteItem {
+  id: string;
+  type: "highlight" | "thought";
+  text: string | null;
+  quote: string | null;
+  chapterUid: number | null;
+  chapterTitle: string | null;
+  createTime: number | null;
+}
+
+export interface WeReadBookNotesPayload {
+  configured: boolean;
+  book: {
+    bookId: string | null;
+    title: string | null;
+    author: string | null;
+    cover: string | null;
+  };
+  items: WeReadBookNoteQuoteItem[];
+  count: number;
+}
+
 export async function fetchWeReadStatus(
   token: string,
   base: string = "",
@@ -506,6 +528,19 @@ export async function fetchWeReadNotes(
 ): Promise<WeReadNotesPayload> {
   return request<WeReadNotesPayload>(
     `${base}/api/weread/notes`,
+    token,
+    undefined,
+    WEREAD_FETCH_TIMEOUT_MS,
+  );
+}
+
+export async function fetchWeReadBookNotes(
+  token: string,
+  bookId: string,
+  base: string = "",
+): Promise<WeReadBookNotesPayload> {
+  return request<WeReadBookNotesPayload>(
+    `${base}/api/weread/notes/${encodeURIComponent(bookId)}`,
     token,
     undefined,
     WEREAD_FETCH_TIMEOUT_MS,

@@ -118,8 +118,10 @@ from nanobot.webui.thread_disk import delete_webui_thread
 from nanobot.webui.transcript import build_webui_thread_response
 from nanobot.webui.weread_api import (
     WeReadError,
+    fetch_book_notes,
     fetch_notebooks,
     fetch_shelf_enriched,
+    normalize_book_notes,
     normalize_notebooks,
     weread_configured,
 )
@@ -1089,6 +1091,9 @@ class GatewayHTTPHandler:
             return await self._handle_weread_shelf(request)
         if got == "/api/weread/notes":
             return await self._handle_weread_notes(request)
+        m = re.match(r"^/api/weread/notes/([^/]+)$", got)
+        if m:
+            return await self._handle_weread_book_notes(request, m.group(1))
         return None
 
     def _handle_weread_status(self, request: WsRequest) -> Response:
@@ -1119,6 +1124,21 @@ class GatewayHTTPHandler:
             self._log.exception("weread notebooks fetch failed")
             return _http_error(500, "weread notebooks fetch failed")
         return _http_json_response(normalize_notebooks(payload))
+
+    async def _handle_weread_book_notes(self, request: WsRequest, book_id: str) -> Response:
+        if not self.check_api_token(request):
+            return _http_error(401, "Unauthorized")
+        decoded_book_id = _decode_api_key(book_id)
+        if decoded_book_id is None:
+            return _http_error(400, "invalid book id")
+        try:
+            bookmarks_payload, reviews_payload = await fetch_book_notes(decoded_book_id)
+        except WeReadError as exc:
+            return _http_error(exc.status, exc.message)
+        except Exception:
+            self._log.exception("weread book notes fetch failed")
+            return _http_error(500, "weread book notes fetch failed")
+        return _http_json_response(normalize_book_notes(bookmarks_payload, reviews_payload))
 
     def _handle_commands(self, request: WsRequest) -> Response:
         if not self.check_api_token(request):

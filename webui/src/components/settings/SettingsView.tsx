@@ -3,15 +3,7 @@ import { useEffect, useState } from "react";
 import { fetchWeReadStatus } from "@/lib/api";
 import { useClient } from "@/providers/ClientProvider";
 
-export function SettingsView({
-  theme,
-  onToggleTheme,
-  onLogout,
-}: {
-  theme: "light" | "dark";
-  onToggleTheme: () => void;
-  onLogout: () => void;
-}) {
+export function SettingsView({ onLogout }: { onLogout: () => void }) {
   const { getToken } = useClient();
   const [configured, setConfigured] = useState<boolean | null>(null);
 
@@ -37,34 +29,20 @@ export function SettingsView({
         </div>
       </header>
 
-      <div className="shelf-container">
-        <div className="book-item toread" style={{ height: "auto", padding: 14 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span className="book-name">WeRead connection</span>
-            <span style={{ fontSize: 13 }}>
-              {configured === null
-                ? "Checking..."
-                : configured
-                  ? "Connected"
-                  : "Not connected (set WEREAD_API_KEY)"}
-            </span>
-          </div>
-        </div>
-
-        <div className="book-item toread" style={{ height: "auto", padding: 14 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span className="book-name">Theme</span>
-            <span style={{ fontSize: 13 }}>{theme === "dark" ? "Dark" : "Light"} (affects Ask-Book)</span>
-          </div>
-          <span className="book-info">
-            <button type="button" className="header-btn" onClick={onToggleTheme}>
-              Toggle
-            </button>
+      <div className="settings-list">
+        <div className="settings-row">
+          <span className="settings-row-label">WeRead connection</span>
+          <span className="settings-row-value">
+            {configured === null
+              ? "Checking..."
+              : configured
+                ? "Connected"
+                : "Not connected (set WEREAD_API_KEY)"}
           </span>
         </div>
 
-        <button type="button" className="header-btn" style={{ width: "100%", padding: "12px 0" }} onClick={onLogout}>
-          Log out
+        <button type="button" className="settings-row settings-row-action" onClick={onLogout}>
+          <span className="settings-row-label">Log out</span>
         </button>
       </div>
     </>

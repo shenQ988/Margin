@@ -10,8 +10,10 @@ from nanobot.agent.tools.weread import WeReadError, call_weread_api
 
 __all__ = [
     "WeReadError",
+    "fetch_book_notes",
     "fetch_notebooks",
     "fetch_shelf_enriched",
+    "normalize_book_notes",
     "normalize_notebooks",
     "normalize_shelf",
     "weread_configured",
@@ -180,6 +182,73 @@ async def fetch_notebooks() -> dict[str, Any]:
     """Fetch the raw ``/user/notebooks`` payload from the WeRead gateway."""
     api_key = os.environ.get("WEREAD_API_KEY") or ""
     return await _fetch_notebooks_raw(api_key)
+
+
+async def fetch_book_notes(book_id: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Fetch a single book's highlights (`/book/bookmarklist`) and personal
+    thoughts/reviews (`/review/list/mine`) concurrently."""
+    api_key = os.environ.get("WEREAD_API_KEY") or ""
+    bookmarks_payload, reviews_payload = await asyncio.gather(
+        call_weread_api(api_key, "/book/bookmarklist", bookId=book_id),
+        call_weread_api(api_key, "/review/list/mine", bookid=book_id, count=200),
+    )
+    return bookmarks_payload, reviews_payload
+
+
+def normalize_book_notes(
+    bookmarks_payload: dict[str, Any],
+    reviews_payload: dict[str, Any],
+) -> dict[str, Any]:
+    """Merge highlight and thought/review content into one chronological list."""
+    chapter_titles = {
+        chapter.get("chapterUid"): chapter.get("title")
+        for chapter in cast(list[dict[str, Any]], bookmarks_payload.get("chapters") or [])
+    }
+    book = cast(dict[str, Any], bookmarks_payload.get("book") or {})
+
+    items: list[dict[str, Any]] = []
+    for bookmark in cast(list[dict[str, Any]], bookmarks_payload.get("updated") or []):
+        chapter_uid = bookmark.get("chapterUid")
+        items.append(
+            {
+                "id": f"bm:{bookmark.get('bookmarkId')}",
+                "type": "highlight",
+                "text": bookmark.get("markText"),
+                "quote": None,
+                "chapterUid": chapter_uid,
+                "chapterTitle": chapter_titles.get(chapter_uid),
+                "createTime": bookmark.get("createTime"),
+            }
+        )
+
+    for entry in cast(list[dict[str, Any]], reviews_payload.get("reviews") or []):
+        review = cast(dict[str, Any], entry.get("review") or {})
+        chapter_uid = review.get("chapterUid")
+        items.append(
+            {
+                "id": f"rv:{review.get('reviewId')}",
+                "type": "thought",
+                "text": review.get("content"),
+                "quote": review.get("abstract"),
+                "chapterUid": chapter_uid,
+                "chapterTitle": review.get("chapterName") or chapter_titles.get(chapter_uid),
+                "createTime": review.get("createTime"),
+            }
+        )
+
+    items.sort(key=lambda item: cast(int, item.get("createTime") or 0), reverse=True)
+
+    return {
+        "configured": True,
+        "book": {
+            "bookId": book.get("bookId"),
+            "title": book.get("title"),
+            "author": book.get("author"),
+            "cover": book.get("cover"),
+        },
+        "items": items,
+        "count": len(items),
+    }
 
 
 def normalize_notebooks(payload: dict[str, Any]) -> dict[str, Any]:

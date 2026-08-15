@@ -46,7 +46,7 @@ export default {
           "Consolas",
           "monospace",
         ],
-        hand: ['"Quicksand"', '"Comic Sans MS"', "cursive", "sans-serif"],
+        hand: ['"Lora"', "Georgia", "serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

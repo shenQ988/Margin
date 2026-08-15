@@ -17,12 +17,22 @@ function openBook(item: WeReadShelfItem): void {
 
 export function BookCard({ item }: { item: WeReadShelfItem }) {
   return (
-    <button type="button" onClick={() => openBook(item)} className={cn("book-item", item.status)}>
-      <span className="book-name">{item.title}</span>
-      <span className="book-info">
-        <span>{item.progress != null ? `${item.progress}%` : STATUS_LABEL[item.status]}</span>
-        {item.hasNote ? <span aria-label="Has note">★ Note</span> : null}
+    <button type="button" onClick={() => openBook(item)} className="book-card">
+      <span className={cn("book-cover", !item.cover && item.status)}>
+        {item.cover ? (
+          <img src={item.cover} alt="" loading="lazy" />
+        ) : (
+          <span className="book-cover-fallback">{item.title}</span>
+        )}
+        {item.hasNote ? (
+          <span className="book-cover-note" aria-label="Has note">★</span>
+        ) : null}
+        {item.progress != null ? (
+          <span className="book-cover-progress">{item.progress}%</span>
+        ) : null}
       </span>
+      <span className="book-title">{item.title}</span>
+      {item.progress == null ? <span className="book-status">{STATUS_LABEL[item.status]}</span> : null}
     </button>
   );
 }

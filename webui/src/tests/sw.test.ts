@@ -220,7 +220,7 @@ describe("service worker", () => {
 
   it("keeps un-hashed brand assets on the network-first path", async () => {
     const sw = loadSw();
-    const iconUrl = `${ORIGIN}/brand/nanobot_icon_192.png`;
+    const iconUrl = `${ORIGIN}/brand/chat_icon_192.png`;
     const originalRequest = new Request(iconUrl);
     sw.fetchMock.mockResolvedValue(new Response("png bytes"));
 

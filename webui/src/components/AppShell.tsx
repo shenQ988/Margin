@@ -72,12 +72,12 @@ export function AppShell({
           <NotesView />
         </Pane>
       ) : null}
-      <Pane active={tab === "ask-book"}>
+      <Pane active={tab === "ask-book"} bottomClearance>
         <ChatTabView theme={theme} onToggleTheme={onToggleTheme} />
       </Pane>
       {visited.has("settings") ? (
         <Pane active={tab === "settings"} scrollable>
-          <SettingsView theme={theme} onToggleTheme={onToggleTheme} onLogout={onLogout} />
+          <SettingsView onLogout={onLogout} />
         </Pane>
       ) : null}
 
@@ -102,10 +102,16 @@ export function AppShell({
 function Pane({
   active,
   scrollable = false,
+  bottomClearance = false,
   children,
 }: {
   active: boolean;
   scrollable?: boolean;
+  /** Reserve space for the fixed bottom nav instead of letting content (e.g.
+      ThreadShell's own composer) render underneath it. Scrollable panes
+      already do this via `.shelf-container`'s own bottom padding; this is
+      for non-scrollable panes (Ask-Book) that fill their full container. */
+  bottomClearance?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -115,6 +121,7 @@ function Pane({
         scrollable ? "overflow-y-auto" : "overflow-hidden",
         active ? "" : "hidden",
       )}
+      style={bottomClearance ? { paddingBottom: "var(--bottom-nav-height, 60px)" } : undefined}
     >
       {children}
     </div>
