@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { BookCard } from "@/components/bookshelf/BookCard";
+import { NoteDetailView } from "@/components/notes/NoteDetailView";
 import { fetchWeReadShelf, fetchWeReadStatus, type WeReadShelfItem } from "@/lib/api";
 import { useClient } from "@/providers/ClientProvider";
 
@@ -16,6 +17,9 @@ export function BookshelfView() {
   const { getToken } = useClient();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [filter, setFilter] = useState<StatusFilter>("all");
+  const [selected, setSelected] = useState<
+    { bookId: string; title: string; deepLink: string | null } | null
+  >(null);
 
   const load = useCallback(async () => {
     setState({ status: "loading" });
@@ -41,6 +45,29 @@ export function BookshelfView() {
     () => (filter === "all" ? items : items.filter((item) => item.status === filter)),
     [items, filter],
   );
+
+  const handleOpenHighlights = useCallback((item: WeReadShelfItem) => {
+    if (item.kind === "book") {
+      setSelected({ bookId: String(item.id), title: item.title ?? "", deepLink: item.deepLink });
+      return;
+    }
+    // Albums/collections don't have a per-book highlights view — fall back
+    // to opening WeRead directly, same as the old default click behavior.
+    if (item.deepLink) {
+      window.open(item.deepLink, "_blank", "noopener,noreferrer");
+    }
+  }, []);
+
+  if (selected) {
+    return (
+      <NoteDetailView
+        bookId={selected.bookId}
+        fallbackTitle={selected.title}
+        deepLink={selected.deepLink}
+        onBack={() => setSelected(null)}
+      />
+    );
+  }
 
   return (
     <>
@@ -95,7 +122,11 @@ export function BookshelfView() {
       ) : (
         <div className="shelf-container">
           {filteredItems.map((item) => (
-            <BookCard key={`${item.kind}:${item.id}`} item={item} />
+            <BookCard
+              key={`${item.kind}:${item.id}`}
+              item={item}
+              onOpenHighlights={handleOpenHighlights}
+            />
           ))}
         </div>
       )}

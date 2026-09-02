@@ -174,7 +174,11 @@ class WeReadTool(Tool):
             "Call the WeRead (微信读书) reading app API. Actions: search, shelf, notebooks, "
             "bookmarklist, reviews_mine, readdata, reviews, recommend. Read the weread-skills "
             "skill doc first for field semantics and output formatting rules; this tool returns "
-            "raw API JSON, not formatted prose."
+            "raw API JSON, not formatted prose. Every result is a live snapshot of external "
+            "state (shelf contents, reading progress, notebooks, etc.) that can change outside "
+            "this conversation at any time — call this tool again for current data rather than "
+            "relying on an earlier answer in this session or on remembered facts; results are "
+            "never persisted to long-term memory for this reason (see memory_classification.py)."
         )
 
     def validate_params(self, params: dict[str, Any]) -> list[str]:

@@ -1,0 +1,39 @@
+[
+  {
+    "book_id": "CB_9s72LX2ML3pN75h75LGeAGJ4",
+    "book_title": "Pride and Prejudice",
+    "real_highlights": [
+      "Oh! my dear, I am quite delighted with him. He is so\nexcessively handsome! And his sisters are charming wom-en. I never in my life saw anything more elegant than their dresses. I dare say the lace upon Mrs. Hurst’s gown—‘Here she was interrupted again. Mr. Bennet protested against any description of finery. She was therefore obliged to seek another branch of the subject, and related, with much bitterness of spirit and some exaggeration, the shock-ing rudeness of Mr. Darcy.",
+      "Only think of THAT, my dear; he actually danced with her twice! and she was the only creature in the room that he asked a second time. First of all, he asked Miss Lucas.",
+      "I am particularly acquainted with my partner. At such an assembly as this it would be insupportable. Your sisters are engaged, and there is not another woman in the room whom it would not be a punishment to me to stand up with.’",
+      "What an excellent father you have, girls!’ said she, when\nthe door was shut. ‘I do not know how you will ever make him amends for his kindness; or me, either, for that matter. At our time of life it is not so pleasant, I can tell you, to be making new acquaintances every day; but for your sakes, we would do anything. Lydia, my love, though you ARE the youngest, I dare say Mr. Bingley will dance with you at the next ball.’",
+      "Mr. Bennet was so odd a mixture of quick parts, sar-castic humour, reserve, and caprice, that the experience of three-and-twenty years had been insufficient to make his wife understand his character. HER mind was less difficult to develop. She was a woman of mean understanding, little information, and uncertain temper. When she was discon-tented, she fancied herself nervous. The business of her life was to get her daughters married; its solace was visiting and news.",
+      "I\nt is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man\nmay be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered the rightful property of some one or other of their daughters."
+    ],
+    "injected_claims": [
+      {
+        "text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome! And I hear he is already engaged to be married, to a young lady of thirty thousand pounds he left behind in London!",
+        "is_true": false,
+        "position": 0.2,
+        "why_false": "Invents a plot event that never happens: Bingley is unattached when he arrives at Netherfield and later falls for Jane Bennet; no prior engagement to a London lady exists anywhere in the novel."
+      },
+      {
+        "text": "What an excellent mother you have, girls! I do not know how you will ever make her amends for her kindness; she is always telling you to avoid gentlemen like Mr. Wickham!",
+        "is_true": false,
+        "position": 0.6,
+        "why_false": "This claim falsely attributes a concern about Mr. Wickham to Mrs. Bennet, whereas she is not depicted as having such views in the highlights; rather, the family is intrigued by him."
+      },
+      {
+        "text": "It is a truth universally acknowledged that a single man in possession of a good fortune must be in want of a wife, but the only woman he actually desired was Miss Bingley.",
+        "is_true": false,
+        "position": 1.0,
+        "why_false": "This contradicts the central theme of the novel, which revolves around Mr. Darcy's interest in Elizabeth Bennet, not Miss Bingley."
+      }
+    ],
+    "test_questions": [
+      "What does Mrs. Bennet say about Mr. Bingley when she first hears about him?",
+      "What does Mrs. Bennet think of Mr. Wickham?",
+      "Who does Mr. Darcy actually end up caring for in the story?"
+    ]
+  }
+]

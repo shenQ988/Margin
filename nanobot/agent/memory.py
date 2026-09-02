@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterator, cast
 
 from loguru import logger
 
+from nanobot.agent.memory_classification import filter_persistable_messages
 from nanobot.runtime_context import public_history_messages
 from nanobot.session.manager import MIN_COMPACTED_REPLAY_MESSAGES, Session, SessionManager
 from nanobot.utils.gitstore import GitStore
@@ -285,6 +286,15 @@ class MemoryStore:
         session_key: str | None = None,
     ) -> int:
         """Append *entry* to history.jsonl and return its auto-incrementing cursor.
+
+        *entry* must already have volatile tool-result content (e.g. WeRead
+        shelf/progress/notebooks JSON) excluded by the caller — see
+        ``filter_persistable_messages`` in ``nanobot/agent/memory_classification.py``,
+        applied at both call sites (``Consolidator.archive`` and
+        ``raw_archive``). Everything written here eventually feeds Dream's
+        prompt (``build_dream_prompt`` reads unprocessed entries from this
+        file) and can get baked into USER.md/MEMORY.md, so this file must
+        never contain a live external-state snapshot presented as fact.
 
         Entries are passed through `strip_think` to drop template-level leaks
         (e.g. unclosed `<think` prefixes, `<channel|>` markers) before being
@@ -728,8 +738,16 @@ class MemoryStore:
     ) -> None:
         """Fallback: dump raw messages to history.jsonl without LLM summarization."""
         limit = max_chars if max_chars is not None else _RAW_ARCHIVE_MAX_CHARS
+        # Volatile tool results (e.g. every WeRead action: shelf, progress,
+        # notebooks, bookmarks, stats) reflect live external state that can
+        # change at any time outside this conversation. This is the raw-dump
+        # fallback path (LLM summarization failed), so without this filter a
+        # WeRead JSON payload would land verbatim in history.jsonl and, via
+        # Dream, get baked into USER.md/MEMORY.md as if it were permanent —
+        # the exact stale-bookshelf-answer bug this module exists to prevent.
+        # See nanobot/agent/memory_classification.py.
         formatted = truncate_text(
-            self._format_messages(public_history_messages(messages)),
+            self._format_messages(filter_persistable_messages(public_history_messages(messages))),
             limit,
         )
         self.append_history(
@@ -1006,6 +1024,19 @@ class Consolidator:
         messages_to_summarize = public_history_messages(
             summary_messages if summary_messages is not None else messages
         )
+        # Exclude volatile tool results (e.g. every WeRead action: shelf,
+        # progress, notebooks, bookmarks, stats) before they reach the
+        # summarization LLM. This is the actual fix for the stale-bookshelf
+        # bug: a WeRead JSON payload is live external state, not fact — if
+        # the summarizer sees it, it can produce a summary like "shelf has
+        # 42 books" that then gets archived into history.jsonl and, via
+        # Dream, baked into USER.md/MEMORY.md as if it were permanent,
+        # confidently resurfacing as stale data in every future turn/session.
+        # Filtering is deterministic (see nanobot/agent/memory_classification.py),
+        # never an LLM judgment call. The summarizer still sees ordinary
+        # user/assistant prose, so it can note *that* the user asked about
+        # their shelf — it just never sees the raw numbers to enshrine.
+        messages_to_summarize = filter_persistable_messages(messages_to_summarize)
         formatted = MemoryStore._format_messages(messages_to_summarize)
         formatted = self._truncate_to_token_budget(formatted, runtime=runtime)
         system_prompt = render_template(

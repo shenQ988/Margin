@@ -1188,6 +1188,91 @@ class TestRawArchiveTruncation:
         assert len(entries[0]["content"]) < 200
 
 
+class TestVolatileToolResultExclusion:
+    """Regression coverage for the stale-bookshelf bug: a WeRead tool result
+    must never survive into history.jsonl (and from there, via Dream, into
+    USER.md/MEMORY.md) — neither through the raw-dump fallback nor through
+    the LLM-summarization path. See nanobot/agent/memory_classification.py.
+    """
+
+    def test_raw_archive_excludes_weread_tool_result(self, store):
+        messages = [
+            {"role": "user", "content": "what's on my shelf?"},
+            {
+                "role": "tool",
+                "tool_call_id": "call-1",
+                "name": "weread",
+                "content": '{"books": [{"title": "STALE_SHELF_PAYLOAD"}]}',
+            },
+        ]
+        store.raw_archive(messages)
+        entry = store.read_unprocessed_history(since_cursor=0)[0]["content"]
+        assert "what's on my shelf?" in entry
+        assert "STALE_SHELF_PAYLOAD" not in entry
+
+    async def test_archive_excludes_weread_tool_result_from_summarizer_prompt(
+        self, consolidator, mock_provider, runtime
+    ):
+        """The raw WeRead payload must never even reach the summarization
+        LLM's prompt — otherwise the LLM could echo the live numbers into a
+        summary that then gets archived as if it were a durable fact."""
+        mock_provider.chat_with_retry.return_value = MagicMock(
+            content="User asked about their shelf.", finish_reason="stop"
+        )
+        messages = [
+            {"role": "user", "content": "what's on my shelf?"},
+            {
+                "role": "tool",
+                "tool_call_id": "call-1",
+                "name": "weread",
+                "content": '{"books": [{"title": "STALE_SHELF_PAYLOAD"}]}',
+            },
+            {"role": "assistant", "content": "You have 42 books, including STALE_SHELF_PAYLOAD."},
+        ]
+
+        await consolidator.archive(messages, runtime=runtime)
+
+        prompt = mock_provider.chat_with_retry.call_args.kwargs["messages"][1]["content"]
+        assert "what's on my shelf?" in prompt
+        # The tool-result message itself must be gone from the prompt...
+        assert '"books"' not in prompt
+        # ...even though the same literal text appearing in ordinary
+        # assistant prose (not a tool result) is untouched by this filter.
+        assert "STALE_SHELF_PAYLOAD" in prompt
+
+    async def test_archive_raw_fallback_excludes_weread_tool_result(
+        self, consolidator, mock_provider, store, runtime
+    ):
+        """Same guarantee on the raw-dump fallback path (LLM call failed)."""
+        mock_provider.chat_with_retry.side_effect = Exception("API error")
+        messages = [
+            {"role": "user", "content": "what's on my shelf?"},
+            {
+                "role": "tool",
+                "tool_call_id": "call-1",
+                "name": "weread",
+                "content": '{"books": [{"title": "STALE_SHELF_PAYLOAD"}]}',
+            },
+        ]
+
+        await consolidator.archive(messages, runtime=runtime)
+
+        entry = store.read_unprocessed_history(since_cursor=0)[0]["content"]
+        assert "[RAW]" in entry
+        assert "STALE_SHELF_PAYLOAD" not in entry
+
+    def test_non_weread_tool_result_still_excluded_by_default_deny(self, store):
+        """An unrecognized tool name is not exempted — default-deny applies
+        to every tool, not just weread, since a false PERSISTABLE is worse
+        than an unnecessary re-fetch."""
+        messages = [
+            {"role": "tool", "tool_call_id": "call-1", "name": "some_future_tool", "content": "DATA"},
+        ]
+        store.raw_archive(messages)
+        entry = store.read_unprocessed_history(since_cursor=0)[0]["content"]
+        assert "DATA" not in entry
+
+
 class TestArchiveTruncation:
     """archive() must truncate formatted text before sending to consolidation LLM."""
 

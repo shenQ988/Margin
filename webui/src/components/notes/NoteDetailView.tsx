@@ -11,10 +11,12 @@ type LoadState =
 export function NoteDetailView({
   bookId,
   fallbackTitle,
+  deepLink,
   onBack,
 }: {
   bookId: string;
   fallbackTitle: string;
+  deepLink?: string | null;
   onBack: () => void;
 }) {
   const { getToken } = useClient();
@@ -49,6 +51,16 @@ export function NoteDetailView({
             ← Back
           </button>
         </div>
+        {deepLink ? (
+          <a
+            href={deepLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="header-btn"
+          >
+            Open in WeRead ↗
+          </a>
+        ) : null}
       </header>
 
       <div style={{ padding: "0 16px 12px" }}>

@@ -1,0 +1,198 @@
+{
+  "fixtures": [
+    {
+      "book_id": "CB_9s72LX2ML3pN75h75LGeAGJ4",
+      "book_title": "Pride and Prejudice",
+      "questions": [
+        {
+          "question": "What does Mrs. Bennet say about Mr. Bingley when she first hears about him?",
+          "answer": "When Mrs. Bennet first hears about Mr. Bingley, she expresses her delight by saying, \"Oh! my dear, I am quite delighted with him. He is so excessively handsome!\" She also comments on the elegance of his sisters and their dresses, indicating her excitement about Mr. Bingley and his social connections. Additionally, she mentions that she has heard he is already engaged to a young lady with a substantial fortune, which adds to her interest in him.",
+          "claims": [
+            {
+              "claim": "Mrs. Bennet first hears about Mr. Bingley.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            },
+            {
+              "claim": "Mrs. Bennet expresses her delight by saying, 'Oh! my dear, I am quite delighted with him.'",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome! And his sisters are charming wom-en."
+            },
+            {
+              "claim": "Mrs. Bennet says Mr. Bingley is so excessively handsome.",
+              "grounded": false,
+              "hallucination_source": "repeated_injection",
+              "matched_text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome! And I hear he is already engaged to be married, to a young lady of thirty thousand pounds he left behind in London!"
+            },
+            {
+              "claim": "Mrs. Bennet comments on the elegance of Mr. Bingley's sisters.",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome! And his sisters are charming wom-en. I never in my life saw anything more elegant than their dresses."
+            },
+            {
+              "claim": "Mrs. Bennet comments on the dresses of Mr. Bingley's sisters.",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": "I never in my life saw anything more elegant than their dresses."
+            },
+            {
+              "claim": "Mrs. Bennet indicates her excitement about Mr. Bingley and his social connections.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            },
+            {
+              "claim": "Mrs. Bennet mentions that she has heard Mr. Bingley is already engaged to a young lady.",
+              "grounded": false,
+              "hallucination_source": "repeated_injection",
+              "matched_text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome! And I hear he is already engaged to be married, to a young lady of thirty thousand pounds he left behind in London!"
+            },
+            {
+              "claim": "The young lady Mr. Bingley is engaged to has a substantial fortune.",
+              "grounded": false,
+              "hallucination_source": "repeated_injection",
+              "matched_text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome! And I hear he is already engaged to be married, to a young lady of thirty thousand pounds he left behind in London!"
+            },
+            {
+              "claim": "Mrs. Bennet's interest in Mr. Bingley is added to by the information about his engagement.",
+              "grounded": false,
+              "hallucination_source": "repeated_injection",
+              "matched_text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome! And I hear he is already engaged to be married, to a young lady of thirty thousand pounds he left behind in London!"
+            }
+          ]
+        },
+        {
+          "question": "What does Mrs. Bennet think of Mr. Wickham?",
+          "answer": "Mrs. Bennet seems to have a very favorable opinion of Mr. Wickham. She expresses delight in his appearance, describing him as \"excessively handsome,\" and she is impressed by his sisters, whom she finds charming and elegantly dressed. Her enthusiasm is evident when she says, \"Oh! my dear, I am quite delighted with him.\" This admiration for Mr. Wickham contrasts with her feelings towards Mr. Darcy, whom she criticizes for his rudeness. Overall, Mrs. Bennet's perspective on Mr. Wickham is positive, highlighting her interest in his social standing and attractiveness.",
+          "claims": [
+            {
+              "claim": "Mrs. Bennet seems to have a very favorable opinion of Mr. Wickham.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            },
+            {
+              "claim": "She expresses delight in his appearance.",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": null
+            },
+            {
+              "claim": "She describes him as 'excessively handsome.'",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome!"
+            },
+            {
+              "claim": "She is impressed by his sisters.",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": "Oh! my dear, I am quite delighted with him. He is so excessively handsome! And his sisters are charming wom-en."
+            },
+            {
+              "claim": "She finds his sisters charming and elegantly dressed.",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": "And his sisters are charming wom-en. I never in my life saw anything more elegant than their dresses."
+            },
+            {
+              "claim": "Her enthusiasm is evident when she says, 'Oh! my dear, I am quite delighted with him.'",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": "Oh! my dear, I am quite delighted with him."
+            },
+            {
+              "claim": "This admiration for Mr. Wickham contrasts with her feelings towards Mr. Darcy.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            },
+            {
+              "claim": "She criticizes Mr. Darcy for his rudeness.",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": "she related, with much bitterness of spirit and some exaggeration, the shocking rudeness of Mr. Darcy."
+            },
+            {
+              "claim": "Overall, Mrs. Bennet's perspective on Mr. Wickham is positive.",
+              "grounded": false,
+              "hallucination_source": "repeated_injection",
+              "matched_text": "she is always telling you to avoid gentlemen like Mr. Wickham!"
+            },
+            {
+              "claim": "Her perspective highlights her interest in his social standing and attractiveness.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            }
+          ]
+        },
+        {
+          "question": "Who does Mr. Darcy actually end up caring for in the story?",
+          "answer": "In \"Pride and Prejudice,\" Mr. Darcy ultimately cares for Elizabeth Bennet. Although the story begins with societal expectations and misunderstandings, it becomes clear that the only woman he truly desires is Elizabeth, despite the initial impressions and complications involving other characters. The highlighted passages indicate that while there are societal pressures regarding marriage, Mr. Darcy's affections are specifically directed towards Elizabeth, showcasing a deeper connection that transcends mere social expectations.",
+          "claims": [
+            {
+              "claim": "In 'Pride and Prejudice,' Mr. Darcy ultimately cares for Elizabeth Bennet.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            },
+            {
+              "claim": "The story begins with societal expectations and misunderstandings.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            },
+            {
+              "claim": "It becomes clear that the only woman Mr. Darcy truly desires is Elizabeth.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            },
+            {
+              "claim": "There are initial impressions and complications involving other characters.",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": null
+            },
+            {
+              "claim": "The highlighted passages indicate societal pressures regarding marriage.",
+              "grounded": true,
+              "hallucination_source": null,
+              "matched_text": null
+            },
+            {
+              "claim": "Mr. Darcy's affections are specifically directed towards Elizabeth.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            },
+            {
+              "claim": "Mr. Darcy's affections showcase a deeper connection that transcends mere social expectations.",
+              "grounded": false,
+              "hallucination_source": "free_invention",
+              "matched_text": null
+            }
+          ]
+        }
+      ],
+      "total_claims": 26,
+      "repeated_injection_count": 5,
+      "free_invention_count": 10,
+      "repeated_injection_rate": 0.19230769230769232,
+      "free_invention_rate": 0.38461538461538464,
+      "overall_hallucination_rate": 0.5769230769230769
+    }
+  ],
+  "aggregate": {
+    "total_claims": 26,
+    "repeated_injection_count": 5,
+    "free_invention_count": 10,
+    "repeated_injection_rate": 0.19230769230769232,
+    "free_invention_rate": 0.38461538461538464,
+    "overall_hallucination_rate": 0.5769230769230769
+  }
+}

@@ -1,0 +1,425 @@
+{
+  "cases": [
+    {
+      "case_id": "bookshelf_basic",
+      "category": "positive",
+      "question": "what's on my bookshelf?",
+      "expected_tool": "weread_shelf",
+      "actual_tool": "weread_shelf",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "Your bookshelf currently contains the following books:\n\n1. **Sapiens** - Currently reading\n2. **Pride and Prejudice** - Currently reading",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_shelf",
+            "args": {}
+          }
+        ],
+        "final_answer": "Your bookshelf currently contains the following books:\n\n1. **Sapiens** - Currently reading\n2. **Pride and Prejudice** - Currently reading",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "progress_specific",
+      "category": "positive",
+      "question": "how far am I into Pride and Prejudice?",
+      "expected_tool": "weread_progress",
+      "actual_tool": "weread_progress",
+      "invocation_correct": true,
+      "args_correct": true,
+      "extra_tool_calls": false,
+      "final_answer": "You are 42% through \"Pride and Prejudice.\"",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_progress",
+            "args": {
+              "book_title": "Pride and Prejudice"
+            }
+          }
+        ],
+        "final_answer": "You are 42% through \"Pride and Prejudice.\"",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "notebooks_overview",
+      "category": "positive",
+      "question": "which of my books have notes or highlights on them?",
+      "expected_tool": "weread_notebooks",
+      "actual_tool": "weread_notebooks",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "You have notes or highlights on the following book:\n\n- **Sapiens**: 12 highlights.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_notebooks",
+            "args": {}
+          }
+        ],
+        "final_answer": "You have notes or highlights on the following book:\n\n- **Sapiens**: 12 highlights.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "bookmarklist_direct",
+      "category": "positive",
+      "question": "show me the actual highlighted passages from Sapiens",
+      "expected_tool": "weread_bookmarklist",
+      "actual_tool": "weread_bookmarklist",
+      "invocation_correct": true,
+      "args_correct": true,
+      "extra_tool_calls": false,
+      "final_answer": "Here is the highlighted passage from \"Sapiens\":\n\n- \"Fiction has enabled us to cooperate flexibly in large numbers.\"",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_bookmarklist",
+            "args": {
+              "book_title": "Sapiens"
+            }
+          }
+        ],
+        "final_answer": "Here is the highlighted passage from \"Sapiens\":\n\n- \"Fiction has enabled us to cooperate flexibly in large numbers.\"",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "stats_weekly",
+      "category": "positive",
+      "question": "how many hours have I spent reading this week?",
+      "expected_tool": "weread_stats",
+      "actual_tool": "weread_stats",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "You've spent 5.5 hours reading this week.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_stats",
+            "args": {}
+          }
+        ],
+        "final_answer": "You've spent 5.5 hours reading this week.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "ask_about_book_case",
+      "category": "positive",
+      "question": "In Sapiens, what does Harari argue is unique about human cooperation?",
+      "expected_tool": "ask_about_book",
+      "actual_tool": null,
+      "invocation_correct": false,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "In \"Sapiens: A Brief History of Humankind,\" Yuval Noah Harari argues that what makes human cooperation unique is our ability to believe in shared myths and collective fictions. Unlike other species that can cooperate in small groups based on personal relationships or kinship, humans can unite in large numbers around shared beliefs, such as religions, nations, and economic systems. This capacity for large-scale cooperation is facilitated by our ability to communicate complex ideas and create narratives that bind people together, allowing for collaboration beyond immediate social circles. Harari emphasizes that this ability to create and believe in shared myths has been a crucial factor in the success and dominance of Homo sapiens as a species.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [],
+        "final_answer": "In \"Sapiens: A Brief History of Humankind,\" Yuval Noah Harari argues that what makes human cooperation unique is our ability to believe in shared myths and collective fictions. Unlike other species that can cooperate in small groups based on personal relationships or kinship, humans can unite in large numbers around shared beliefs, such as religions, nations, and economic systems. This capacity for large-scale cooperation is facilitated by our ability to communicate complex ideas and create narratives that bind people together, allowing for collaboration beyond immediate social circles. Harari emphasizes that this ability to create and believe in shared myths has been a crucial factor in the success and dominance of Homo sapiens as a species.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "digest_request",
+      "category": "positive",
+      "question": "give me my weekly reading digest",
+      "expected_tool": "generate_weekly_digest",
+      "actual_tool": "generate_weekly_digest",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "This week, you read for a total of 5.5 hours across 2 books.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "generate_weekly_digest",
+            "args": {}
+          }
+        ],
+        "final_answer": "This week, you read for a total of 5.5 hours across 2 books.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "profile_check",
+      "category": "positive",
+      "question": "what are my top reading topics lately?",
+      "expected_tool": "get_reading_profile",
+      "actual_tool": "get_reading_profile",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "Your top reading topics lately have been science and history.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "get_reading_profile",
+            "args": {}
+          }
+        ],
+        "final_answer": "Your top reading topics lately have been science and history.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "add_item_case",
+      "category": "positive",
+      "question": "add Project Hail Mary by Andy Weir to my reading list",
+      "expected_tool": "add_reading_item",
+      "actual_tool": "add_reading_item",
+      "invocation_correct": true,
+      "args_correct": true,
+      "extra_tool_calls": false,
+      "final_answer": "I've added \"Project Hail Mary\" by Andy Weir to your reading list!",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "add_reading_item",
+            "args": {
+              "title": "Project Hail Mary",
+              "author": "Andy Weir"
+            }
+          }
+        ],
+        "final_answer": "I've added \"Project Hail Mary\" by Andy Weir to your reading list!",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "general_knowledge",
+      "category": "negative",
+      "question": "who wrote Pride and Prejudice?",
+      "expected_tool": null,
+      "actual_tool": null,
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "\"Pride and Prejudice\" was written by Jane Austen. It was first published in 1813 and is one of her most famous novels.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [],
+        "final_answer": "\"Pride and Prejudice\" was written by Jane Austen. It was first published in 1813 and is one of her most famous novels.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "opinion_question",
+      "category": "negative",
+      "question": "do you think reading fiction is valuable?",
+      "expected_tool": null,
+      "actual_tool": null,
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "Yes, reading fiction can be very valuable for several reasons:\n\n1. **Empathy and Understanding**: Fiction allows readers to experience different perspectives and lives, fostering empathy and a deeper understanding of others' emotions and experiences.\n\n2. **Creativity and Imagination**: Engaging with fictional worlds can stimulate creativity and imagination, encouraging readers to think outside the box.\n\n3. **Cognitive Benefits**: Reading fiction can improve vocabulary, comprehension, and critical thinking skills. It challenges readers to follow complex plots and character developments.\n\n4. **Emotional Exploration**: Fiction often explores complex themes and emotions, providing a safe space for readers to reflect on their own feelings and experiences.\n\n5. **Cultural Insight**: Many works of fiction reflect cultural contexts and societal issues, offering insights into different cultures and historical periods.\n\nOverall, fiction can enrich our lives in many ways, making it a valuable pursuit.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [],
+        "final_answer": "Yes, reading fiction can be very valuable for several reasons:\n\n1. **Empathy and Understanding**: Fiction allows readers to experience different perspectives and lives, fostering empathy and a deeper understanding of others' emotions and experiences.\n\n2. **Creativity and Imagination**: Engaging with fictional worlds can stimulate creativity and imagination, encouraging readers to think outside the box.\n\n3. **Cognitive Benefits**: Reading fiction can improve vocabulary, comprehension, and critical thinking skills. It challenges readers to follow complex plots and character developments.\n\n4. **Emotional Exploration**: Fiction often explores complex themes and emotions, providing a safe space for readers to reflect on their own feelings and experiences.\n\n5. **Cultural Insight**: Many works of fiction reflect cultural contexts and societal issues, offering insights into different cultures and historical periods.\n\nOverall, fiction can enrich our lives in many ways, making it a valuable pursuit.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "chitchat_thanks",
+      "category": "negative",
+      "question": "thanks, that's really helpful!",
+      "expected_tool": null,
+      "actual_tool": null,
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "You're welcome! If you have any more questions or need assistance with your reading, feel free to ask!",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [],
+        "final_answer": "You're welcome! If you have any more questions or need assistance with your reading, feel free to ask!",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "meta_capabilities",
+      "category": "negative",
+      "question": "what kinds of things can you help me with?",
+      "expected_tool": null,
+      "actual_tool": null,
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "I can assist you with various aspects of your reading experience, including:\n\n1. **Managing Your Reading List**: I can help you add books to your reading list or queue.\n\n2. **Tracking Progress**: I can provide updates on your reading progress for specific books.\n\n3. **Notes and Highlights**: I can show you your personal notes and highlights from the books you're reading.\n\n4. **Reading Statistics**: I can fetch statistics about your reading habits, such as time spent reading or books completed.\n\n5. **Weekly Digests**: I can generate a summary of your reading activity over the past week.\n\n6. **Reading Profile**: I can provide insights into your reading habits and favorite genres based on your reading history.\n\n7. **Book Content Questions**: I can answer questions about the content of specific books you're currently reading.\n\nIf you have a specific request or question, feel free to ask!",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [],
+        "final_answer": "I can assist you with various aspects of your reading experience, including:\n\n1. **Managing Your Reading List**: I can help you add books to your reading list or queue.\n\n2. **Tracking Progress**: I can provide updates on your reading progress for specific books.\n\n3. **Notes and Highlights**: I can show you your personal notes and highlights from the books you're reading.\n\n4. **Reading Statistics**: I can fetch statistics about your reading habits, such as time spent reading or books completed.\n\n5. **Weekly Digests**: I can generate a summary of your reading activity over the past week.\n\n6. **Reading Profile**: I can provide insights into your reading habits and favorite genres based on your reading history.\n\n7. **Book Content Questions**: I can answer questions about the content of specific books you're currently reading.\n\nIf you have a specific request or question, feel free to ask!",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "repeat_shelf_q1",
+      "category": "regression",
+      "question": "what's on my bookshelf?",
+      "expected_tool": "weread_shelf",
+      "actual_tool": "weread_shelf",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "Your bookshelf currently contains the following books:\n\n1. **Sapiens** - Currently reading\n2. **Pride and Prejudice** - Currently reading",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_shelf",
+            "args": {}
+          }
+        ],
+        "final_answer": "Your bookshelf currently contains the following books:\n\n1. **Sapiens** - Currently reading\n2. **Pride and Prejudice** - Currently reading",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "repeat_shelf_q2",
+      "category": "regression",
+      "question": "what's on my bookshelf again?",
+      "expected_tool": "weread_shelf",
+      "actual_tool": "weread_shelf",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "Your bookshelf currently contains the following books:\n\n1. **Sapiens** - Currently reading\n2. **Pride and Prejudice** - Currently reading",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_shelf",
+            "args": {}
+          }
+        ],
+        "final_answer": "Your bookshelf currently contains the following books:\n\n1. **Sapiens** - Currently reading\n2. **Pride and Prejudice** - Currently reading",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "repeat_notebooks_q1",
+      "category": "regression",
+      "question": "which of my books have notes on them?",
+      "expected_tool": "weread_notebooks",
+      "actual_tool": "weread_notebooks",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "You have notes on the book **\"Sapiens\"**, with a total of 12 highlights.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_notebooks",
+            "args": {}
+          }
+        ],
+        "final_answer": "You have notes on the book **\"Sapiens\"**, with a total of 12 highlights.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "repeat_notebooks_q2",
+      "category": "regression",
+      "question": "remind me again which books have notes on them?",
+      "expected_tool": "weread_notebooks",
+      "actual_tool": "weread_notebooks",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "You have notes on the book **\"Sapiens\"**, which includes a total of 12 highlights.",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "weread_notebooks",
+            "args": {}
+          }
+        ],
+        "final_answer": "You have notes on the book **\"Sapiens\"**, which includes a total of 12 highlights.",
+        "stop_reason": "completed",
+        "error": null
+      }
+    },
+    {
+      "case_id": "tempting_general_activity",
+      "category": "regression",
+      "question": "anything interesting going on with my reading lately?",
+      "expected_tool": "generate_weekly_digest",
+      "actual_tool": "generate_weekly_digest",
+      "invocation_correct": true,
+      "args_correct": null,
+      "extra_tool_calls": false,
+      "final_answer": "This week, you read for a total of 5.5 hours across 2 books. If you'd like to know more details about your reading or specific books, just let me know!",
+      "stop_reason": "completed",
+      "error": null,
+      "trace": {
+        "tool_calls": [
+          {
+            "name": "generate_weekly_digest",
+            "args": {}
+          }
+        ],
+        "final_answer": "This week, you read for a total of 5.5 hours across 2 books. If you'd like to know more details about your reading or specific books, just let me know!",
+        "stop_reason": "completed",
+        "error": null
+      }
+    }
+  ],
+  "metrics": {
+    "invocation_recall": 0.9285714285714286,
+    "invocation_precision": 1.0,
+    "negative_case_accuracy": 1.0,
+    "argument_accuracy": 1.0,
+    "total_cases": 18
+  }
+}

@@ -70,6 +70,7 @@
 }
 
 .header-btn {
+  display: inline-block;
   border: 2.5px solid var(--crayon-black);
   border-radius: 8px;
   padding: 6px 10px;
@@ -78,6 +79,8 @@
   cursor: pointer;
   font-family: inherit;
   font-size: 13px;
+  color: inherit;
+  text-decoration: none;
 }
 
 .header-btn:active {
@@ -211,6 +214,29 @@
   color: #fff;
   background: rgba(0, 0, 0, 0.55);
   text-align: center;
+}
+
+/* Small "open in WeRead" affordance, separate from the card's main tap
+   target (which opens this app's own highlights view instead). */
+.book-cover-weread-link {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 11px;
+  line-height: 1;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.book-cover-weread-link:active {
+  transform: scale(0.9);
 }
 
 .book-title {
