@@ -73,17 +73,17 @@ def _print_runtime_config_validation_error(
 
 
 def _status_command(config_path: Path) -> str:
-    return f'nanobot status --config "{config_path}"'
+    return f'margin status --config "{config_path}"'
 
 
 def _print_model_setup_steps(config_path: Path) -> None:
     """Show the shortest setup routes shared by Status and Agent startup."""
     config_arg = f'--config "{config_path}"'
     console.print(
-        f"  WebUI: run [cyan]nanobot webui {escape(config_arg)}[/cyan], "
+        f"  WebUI: run [cyan]margin webui {escape(config_arg)}[/cyan], "
         "then open Settings → Models"
     )
-    console.print(f"  CLI:   run [cyan]nanobot onboard --wizard {escape(config_arg)}[/cyan]")
+    console.print(f"  CLI:   run [cyan]margin onboard --wizard {escape(config_arg)}[/cyan]")
     console.print(f"  Check: [cyan]{escape(_status_command(config_path))}[/cyan]")
 
 

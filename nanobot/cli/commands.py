@@ -81,9 +81,9 @@ SafeFileHistory = cli_terminal.SafeFileHistory
 
 
 app = typer.Typer(
-    name="nanobot",
+    name="margin",
     context_settings={"help_option_names": ["-h", "--help"]},
-    help=f"{__logo__} nanobot - Personal AI Assistant",
+    help=f"{__logo__} Margin - Personal Reading Companion",
     no_args_is_help=True,
 )
 
@@ -91,7 +91,7 @@ console = Console()
 
 def version_callback(value: bool):
     if value:
-        console.print(f"{__logo__} nanobot v{__version__}")
+        console.print(f"{__logo__} Margin v{__version__}")
         raise typer.Exit()
 
 
@@ -101,7 +101,7 @@ def main(
         None, "--version", "-v", callback=version_callback, is_eager=True
     ),
 ):
-    """nanobot - Personal AI Assistant."""
+    """Margin - Personal Reading Companion."""
     pass
 
 
@@ -117,7 +117,7 @@ def onboard(
     wizard: bool = typer.Option(False, "--wizard", help="Use interactive wizard"),
     non_interactive_refresh: bool = typer.Option(False, "--refresh", help="Refresh config, preserving existing settings without prompting"),
 ):
-    """Initialize nanobot configuration and workspace."""
+    """Initialize Margin configuration and workspace."""
     from nanobot.config.loader import get_config_path, load_config, save_config, set_config_path
     from nanobot.config.schema import Config
 
@@ -186,7 +186,7 @@ def onboard(
             console.print(f"[green]✓[/green] Config saved at {config_path}")
         except Exception as e:
             console.print(f"[red]✗[/red] Error during configuration: {e}")
-            console.print("[yellow]Please run 'nanobot onboard' again to complete setup.[/yellow]")
+            console.print("[yellow]Please run 'margin onboard' again to complete setup.[/yellow]")
             raise typer.Exit(1)
     _onboard_plugins(config_path)
 
@@ -198,11 +198,11 @@ def onboard(
 
     sync_workspace_templates(workspace_path)
 
-    webui_cmd = "nanobot webui"
+    webui_cmd = "margin webui"
     if explicit_config:
         webui_cmd += f' -c "{config_path}"'
 
-    typer.echo(f"\n✓ nanobot is ready. Run: {webui_cmd}")
+    typer.echo(f"\n✓ Margin is ready. Run: {webui_cmd}")
 
 
 def _onboard_plugins(config_path: Path) -> None:
@@ -504,7 +504,7 @@ def channels_login(
 # Plugin Commands
 # ============================================================================
 
-plugins_app = typer.Typer(help="Manage optional nanobot features")
+plugins_app = typer.Typer(help="Manage optional Margin features")
 app.add_typer(plugins_app, name="plugins")
 
 
@@ -512,7 +512,7 @@ app.add_typer(plugins_app, name="plugins")
 def plugins_list(
     config_path: str | None = typer.Option(None, "--config", "-c", help="Path to config file"),
 ):
-    """List optional nanobot features."""
+    """List optional Margin features."""
     from nanobot.channels.registry import discover_plugins
     from nanobot.config.loader import load_config, set_config_path
 
@@ -533,7 +533,7 @@ def plugins_enable(
     config_path: str | None = typer.Option(None, "--config", "-c", help="Path to config file"),
     logs: bool = typer.Option(False, "--logs/--no-logs", help="Show optional package install logs"),
 ):
-    """Enable a nanobot feature."""
+    """Enable a Margin feature."""
     from nanobot.config.loader import get_config_path, set_config_path
 
     resolved_config_path = Path(config_path).expanduser().resolve() if config_path else None
@@ -561,7 +561,7 @@ def plugins_disable(
     name: str = typer.Argument(..., help="Channel name (e.g. telegram, matrix, slack)"),
     config_path: str | None = typer.Option(None, "--config", "-c", help="Path to config file"),
 ):
-    """Disable a nanobot channel feature."""
+    """Disable a Margin channel feature."""
     from nanobot.config.loader import get_config_path, set_config_path
 
     resolved_config_path = Path(config_path).expanduser().resolve() if config_path else None
@@ -589,11 +589,11 @@ def status(
     config: str | None = typer.Option(None, "--config", "-c", help="Path to config file"),
     workspace: str | None = typer.Option(None, "--workspace", "-w", help="Workspace directory"),
 ):
-    """Show nanobot status."""
+    """Show Margin status."""
     config_path, loaded = _load_inspection_config(config=config, workspace=workspace)
     workspace_path = loaded.workspace_path
 
-    console.print(f"{__logo__} nanobot Status\n")
+    console.print(f"{__logo__} Margin Status\n")
 
     console.print(f"Config: {config_path} {'[green]✓[/green]' if config_path.exists() else '[red]✗[/red]'}")
     console.print(

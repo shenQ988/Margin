@@ -26,13 +26,13 @@ Run the interactive setup wizard. It creates your local configuration and
 asks for an LLM provider and API key:
 
 ```bash
-uv run nanobot onboard --wizard
+uv run margin onboard --wizard
 ```
 
 Start the app and open the URL printed in the terminal:
 
 ```bash
-uv run nanobot webui
+uv run margin webui
 ```
 
 The gateway exposes a health check at `http://127.0.0.1:18790/health` by
@@ -44,7 +44,7 @@ Set a WeRead Agent API key before starting Margin:
 
 ```bash
 export WEREAD_API_KEY="wrk-your-key"
-uv run nanobot webui
+uv run margin webui
 ```
 
 The key is optional: without it, general chat still works, but Margin cannot
@@ -62,7 +62,7 @@ Try prompts such as:
 Run the gateway in one terminal:
 
 ```bash
-uv run nanobot gateway
+uv run margin gateway
 ```
 
 Then run the Vite development server in another:
@@ -94,7 +94,7 @@ Margin stores local configuration under `~/.nanobot/config.json`. Re-run the
 setup wizard whenever you want to change provider settings:
 
 ```bash
-uv run nanobot onboard --wizard
+uv run margin onboard --wizard
 ```
 
 Never commit API keys or your local `~/.nanobot` configuration.

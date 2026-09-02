@@ -47,7 +47,7 @@ def create_gateway_app(
     prepare_webui_bundle: WebUIBundlePreparer | None = None,
 ) -> typer.Typer:
     gateway_app = typer.Typer(
-        help="Start and manage the nanobot gateway.",
+        help="Start and manage the Margin gateway.",
         invoke_without_command=True,
         no_args_is_help=False,
     )
