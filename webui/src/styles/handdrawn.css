@@ -134,6 +134,268 @@
   padding: 0 16px 80px;
 }
 
+.advisor-card {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 16px;
+  padding: 14px;
+  border: 3px solid var(--crayon-black);
+  border-radius: 12px;
+  background: var(--book-paper);
+  box-shadow: 3px 3px 0 rgba(34, 34, 34, 0.16);
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.advisor-card:active {
+  transform: scale(0.99);
+}
+
+.advisor-card p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.advisor-card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.advisor-card-heading span,
+.advisor-recommendation span,
+.advisor-recommendation small {
+  font-size: 11px;
+  color: rgba(34, 34, 34, 0.64);
+}
+
+.advisor-recommendation {
+  display: grid;
+  gap: 2px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(34, 34, 34, 0.45);
+}
+
+.advisor-open-label {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.reading-map-view {
+  padding-bottom: 80px;
+}
+
+.reading-map-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.reading-map-header .header-btn {
+  margin: 0;
+}
+
+.reading-map-header h1 {
+  margin: 0;
+}
+
+.reading-map-confidence {
+  color: rgba(34, 34, 34, 0.64);
+  font-size: 11px;
+  text-align: right;
+}
+
+.reading-map-section {
+  margin: 0 16px 16px;
+  padding: 14px;
+  border: 2px solid var(--crayon-black);
+  border-radius: 10px;
+  background: var(--book-paper);
+}
+
+.reading-path-section {
+  margin: 0 16px 20px;
+  padding: 16px 14px 10px;
+  border: 3px solid var(--crayon-black);
+  border-radius: 12px;
+  background: var(--book-paper);
+}
+
+.reading-path-section h2,
+.reading-path-section > p {
+  margin: 0;
+}
+
+.reading-path-section h2 {
+  font-size: 19px;
+}
+
+.reading-path-section > p {
+  margin-top: 5px;
+  color: rgba(34, 34, 34, 0.72);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.reading-path {
+  position: relative;
+  display: grid;
+  gap: 20px;
+  padding: 20px 0 14px;
+  margin: 0;
+  list-style: none;
+}
+
+.reading-path::before {
+  position: absolute;
+  top: 27px;
+  bottom: 18px;
+  left: 27px;
+  width: 3px;
+  background: var(--crayon-black);
+  content: "";
+  transform: rotate(-10deg);
+  transform-origin: bottom;
+}
+
+.reading-path::after {
+  position: absolute;
+  top: 12px;
+  left: 11px;
+  width: 16px;
+  height: 16px;
+  border-top: 3px solid var(--crayon-black);
+  border-left: 3px solid var(--crayon-black);
+  content: "";
+  transform: rotate(35deg);
+}
+
+.reading-path li {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  width: calc(100% - 50px);
+  margin-left: 30px;
+  padding: 11px 12px;
+  border: 2px solid var(--crayon-black);
+  border-radius: 9px;
+  background: var(--cream-bg);
+}
+
+.reading-path li:nth-child(even) {
+  margin-left: 46px;
+}
+
+.reading-path li::before {
+  position: absolute;
+  top: 50%;
+  left: -20px;
+  width: 11px;
+  height: 11px;
+  border: 3px solid var(--crayon-black);
+  border-radius: 50%;
+  background: var(--book-yellow);
+  content: "";
+  transform: translateY(-50%);
+}
+
+.reading-path-step,
+.reading-path li > span:not(.reading-path-step),
+.reading-path li small {
+  color: rgba(34, 34, 34, 0.64);
+  font-size: 12px;
+}
+
+.reading-path-step {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.reading-map-section h2,
+.reading-map-section p {
+  margin: 0;
+}
+
+.reading-map-section h2 {
+  font-size: 17px;
+}
+
+.reading-map-section > p {
+  margin-top: 5px;
+  color: rgba(34, 34, 34, 0.72);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.reading-map-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.reading-map-topics span {
+  padding: 4px 7px;
+  border: 1px solid var(--crayon-black);
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.reading-map-next {
+  display: grid;
+  gap: 3px;
+}
+
+.reading-map-next > span,
+.reading-map-next small,
+.reading-map-book-list span,
+.reading-map-book-list small {
+  color: rgba(34, 34, 34, 0.64);
+  font-size: 12px;
+}
+
+.reading-map-next > p {
+  margin-top: 5px;
+}
+
+.reading-map-book-list {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 10px 0 0;
+  list-style: none;
+}
+
+.reading-map-book-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1px 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(34, 34, 34, 0.4);
+}
+
+.reading-map-book-list span {
+  grid-column: 1;
+}
+
+.reading-map-book-list small {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.reading-map-empty {
+  font-style: italic;
+}
+
 /* 可点击书本卡片 封面 + 标题 */
 .book-card {
   display: flex;

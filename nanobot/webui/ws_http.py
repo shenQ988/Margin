@@ -118,6 +118,7 @@ from nanobot.webui.thread_disk import delete_webui_thread
 from nanobot.webui.transcript import build_webui_thread_response
 from nanobot.webui.weread_api import (
     WeReadError,
+    fetch_advisor,
     fetch_book_notes,
     fetch_notebooks,
     fetch_shelf_enriched,
@@ -1089,6 +1090,8 @@ class GatewayHTTPHandler:
             return self._handle_weread_status(request)
         if got == "/api/weread/shelf":
             return await self._handle_weread_shelf(request)
+        if got == "/api/weread/advisor":
+            return await self._handle_weread_advisor(request)
         if got == "/api/weread/notes":
             return await self._handle_weread_notes(request)
         m = re.match(r"^/api/weread/notes/([^/]+)$", got)
@@ -1112,6 +1115,17 @@ class GatewayHTTPHandler:
             self._log.exception("weread shelf fetch failed")
             return _http_error(500, "weread shelf fetch failed")
         return _http_json_response(payload)
+
+    async def _handle_weread_advisor(self, request: WsRequest) -> Response:
+        if not self.check_api_token(request):
+            return _http_error(401, "Unauthorized")
+        try:
+            return _http_json_response(await fetch_advisor())
+        except WeReadError as exc:
+            return _http_error(exc.status, exc.message)
+        except Exception:
+            self._log.exception("weread advisor fetch failed")
+            return _http_error(500, "weread advisor fetch failed")
 
     async def _handle_weread_notes(self, request: WsRequest) -> Response:
         if not self.check_api_token(request):

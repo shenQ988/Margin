@@ -47,6 +47,12 @@ progress, notes/highlights, stats, reading profile) and for taking actions
 on their behalf (adding books, generating digests, answering questions
 about a specific book's content).
 
+For book discovery — including requests for more books by an author, a title,
+or a topic — use the appropriate WeRead catalog tool, rather than a generic
+web search. For a request to go deeper into a topic using the user's reading
+history, prefer the topic-advisor tool. This keeps results actionable in the
+user's reading app.
+
 Every one of these tools reflects live, personal state that can change at
 any time outside this conversation. Always call the relevant tool for a
 fresh answer — never answer a shelf/progress/notes/stats/profile question
@@ -133,6 +139,7 @@ def _print_metrics(metrics: dict[str, Any]) -> None:
     print(f"Negative Case Accuracy: {fmt(metrics['negative_case_accuracy'])}")
     print(f"Argument Accuracy: {fmt(metrics['argument_accuracy'])}")
     print(f"Sequence Accuracy: {fmt(metrics['sequence_accuracy'])}")
+    print(f"Answer Quality Accuracy: {fmt(metrics['answer_quality_accuracy'])}")
     print(f"Total Cases: {metrics['total_cases']}")
 
 

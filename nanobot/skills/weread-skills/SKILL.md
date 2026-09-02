@@ -47,6 +47,8 @@ metadata: {"nanobot":{"emoji":"📖","requires":{"env":["WEREAD_API_KEY"]}}}
 | `readdata` | `/readdata/detail` | 无 | 可选 `mode`（weekly/monthly/annually/overall）、`base_time` |
 | `reviews` | `/review/list` | `book_id` | 可选 `review_list_type`、`count`、`max_idx`、`synckey` |
 | `recommend` | `/book/recommend` | 无 | 可选 `count`、`max_idx` |
+| `recommend_author` | 组合动作 | `keyword` | 用书架、笔记和电子书搜索推荐某位作者的其他书；去掉已拥有和重复版本 |
+| `advisor` | 组合动作 | `keyword` | 用书架、笔记和电子书搜索为一个主题生成下一步阅读建议 |
 
 示例：
 
@@ -958,6 +960,20 @@ metadata: {"nanobot":{"emoji":"📖","requires":{"env":["WEREAD_API_KEY"]}}}
 ---
 
 ## 发现推荐好书
+
+### 主题阅读顾问工作流
+
+当用户问“我想在某个主题上深入，该读什么”“根据我的阅读记录规划下一步”时，调用
+`{"action":"advisor","keyword":"主题"}`，不要改用泛化的 `recommend` 或互联网搜索。
+
+该动作会同时读取当前书架、笔记和微信读书电子书目录，并返回已过滤的候选书及分析结果。
+
+1. 先依据 `analysis` 说明用户在该主题的真实阅读：`trueReads` 是至少有 5 条笔记/划线/书签的书，`dormant` 是书架上没有笔记的书，`shallow` 是 1–3 条笔记的书，`hiddenDeepReads` 是不在书架却有至少 10 条笔记的书。
+2. 若用户没有明确数量、是否只限微信读书、语言或篇幅，先用一个简短问题确认这些约束；不要在缺少约束时直接给出书单。
+3. 当 `workflow.route` 为 `path` 时，说明该主题的深读证据少于三本，提供入门阅读路径，而不是假装已有成熟偏好。
+4. 当 `workflow.route` 为 `advisor` 且约束已知时，只能从 `candidates` 推荐 3 或 5 本。每本写明它填补的知识缺口；最后给出“只读一本”的首选和一对进阶搭配。不得推荐书架中已有书、重复版本或工具没有返回的书。
+
+不要展示内部字段、检索参数或推理过程；所有针对用户的判断必须可追溯到该动作返回的实时数据。
 
 ### 接口
 

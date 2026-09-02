@@ -468,6 +468,26 @@ export interface WeReadNotesPayload {
   count: number;
 }
 
+export interface WeReadAdvisorBook {
+  bookId: string;
+  title: string;
+  author: string | null;
+  category: string | null;
+  notes: number;
+  updateTime?: number;
+  reason?: string;
+}
+
+export interface WeReadAdvisorPayload {
+  configured: boolean;
+  deepReads: WeReadAdvisorBook[];
+  dormantBooks: WeReadAdvisorBook[];
+  activeBooks: WeReadAdvisorBook[];
+  topics: Array<{ name: string; deepReadCount: number }>;
+  recommendation: WeReadAdvisorBook | null;
+  confidence: "high" | "low";
+}
+
 export interface WeReadBookNoteQuoteItem {
   id: string;
   type: "highlight" | "thought";
@@ -516,6 +536,18 @@ export async function fetchWeReadShelf(
 ): Promise<WeReadShelfPayload> {
   return request<WeReadShelfPayload>(
     `${base}/api/weread/shelf`,
+    token,
+    undefined,
+    WEREAD_FETCH_TIMEOUT_MS,
+  );
+}
+
+export async function fetchWeReadAdvisor(
+  token: string,
+  base: string = "",
+): Promise<WeReadAdvisorPayload> {
+  return request<WeReadAdvisorPayload>(
+    `${base}/api/weread/advisor`,
     token,
     undefined,
     WEREAD_FETCH_TIMEOUT_MS,

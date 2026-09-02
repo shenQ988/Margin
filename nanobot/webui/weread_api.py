@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import time
 from typing import Any, cast
 
 from nanobot.agent.tools.weread import WeReadError, call_weread_api
@@ -11,9 +12,11 @@ from nanobot.agent.tools.weread import WeReadError, call_weread_api
 __all__ = [
     "WeReadError",
     "fetch_book_notes",
+    "fetch_advisor",
     "fetch_notebooks",
     "fetch_shelf_enriched",
     "normalize_book_notes",
+    "build_reading_profile",
     "normalize_notebooks",
     "normalize_shelf",
     "weread_configured",
@@ -27,6 +30,8 @@ _PROGRESS_CANDIDATE_LIMIT = 5
 # (that race trips a `websockets` library assertion — see git history).
 _NOTEBOOKS_TIMEOUT_S = 6.0
 _PROGRESS_TIMEOUT_S = 5.0
+_DEEP_READ_NOTE_COUNT = 5
+_ACTIVE_READING_DAYS = 30
 
 
 def weread_configured() -> bool:
@@ -96,6 +101,108 @@ async def fetch_shelf_enriched() -> dict[str, Any]:
     progress_by_book_id = {book_id: progress for book_id, progress in progress_results if progress is not None}
 
     return normalize_shelf(shelf_payload, note_book_ids=note_book_ids, progress_by_book_id=progress_by_book_id)
+
+
+async def fetch_advisor() -> dict[str, Any]:
+    """Build a fresh, non-persistent reading profile for the advisor UI."""
+    api_key = os.environ.get("WEREAD_API_KEY") or ""
+    shelf_payload, notebooks_payload = await asyncio.gather(
+        call_weread_api(api_key, "/shelf/sync"),
+        _fetch_notebooks_raw(api_key),
+    )
+    return build_reading_profile(shelf_payload, notebooks_payload)
+
+
+def _count(value: Any) -> int:
+    return value if isinstance(value, int) and not isinstance(value, bool) else 0
+
+
+def _category(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    cleaned = value.strip()
+    return cleaned or None
+
+
+def build_reading_profile(
+    shelf_payload: dict[str, Any],
+    notebooks_payload: dict[str, Any],
+    *,
+    now_timestamp: int | None = None,
+) -> dict[str, Any]:
+    """Derive explainable advisor signals from live shelf and notebook snapshots.
+
+    This function intentionally has no LLM or persistence dependency: its output
+    is a request-local view of external state, never a durable user memory.
+    """
+    note_totals: dict[str, int] = {}
+    for entry in cast(list[dict[str, Any]], notebooks_payload.get("books") or []):
+        book_id = entry.get("bookId")
+        if book_id is None:
+            continue
+        note_totals[str(book_id)] = sum(
+            _count(entry.get(key)) for key in ("reviewCount", "noteCount", "bookmarkCount")
+        )
+
+    now = now_timestamp if now_timestamp is not None else int(time.time())
+    active_cutoff = now - _ACTIVE_READING_DAYS * 24 * 60 * 60
+    deep_reads: list[dict[str, Any]] = []
+    dormant_books: list[dict[str, Any]] = []
+    active_books: list[dict[str, Any]] = []
+    topic_counts: dict[str, int] = {}
+
+    for book in cast(list[dict[str, Any]], shelf_payload.get("books") or []):
+        book_id = book.get("bookId")
+        if book_id is None:
+            continue
+        title = book.get("title")
+        if not isinstance(title, str) or not title.strip():
+            continue
+        notes = note_totals.get(str(book_id), 0)
+        category = _category(book.get("category"))
+        item = {"bookId": str(book_id), "title": title, "author": book.get("author"), "category": category, "notes": notes}
+        if notes >= _DEEP_READ_NOTE_COUNT:
+            deep_reads.append(item)
+            if category is not None:
+                topic_counts[category] = topic_counts.get(category, 0) + 1
+        update_time = _count(book.get("readUpdateTime"))
+        if not _flag(book.get("finishReading")) and update_time >= active_cutoff:
+            active_books.append({**item, "updateTime": update_time})
+        if not _flag(book.get("finishReading")) and not update_time and notes == 0:
+            dormant_books.append(item)
+
+    active_books.sort(key=lambda book: _count(book.get("updateTime")), reverse=True)
+    topics = [
+        {"name": name, "deepReadCount": count}
+        for name, count in sorted(topic_counts.items(), key=lambda pair: (-pair[1], pair[0].lower()))
+    ]
+    strongest_topic = topics[0]["name"] if topics else None
+    candidates = sorted(
+        dormant_books,
+        key=lambda book: (
+            -topic_counts.get(cast(str | None, book.get("category")) or "", 0),
+            str(book["title"]).lower(),
+        ),
+    )
+    recommendation = None
+    if candidates:
+        candidate = candidates[0]
+        reason = (
+            f"It matches your strongest reading topic: {strongest_topic}."
+            if strongest_topic and candidate.get("category") == strongest_topic
+            else "It is already on your shelf and has not yet become an active read."
+        )
+        recommendation = {**candidate, "reason": reason}
+
+    return {
+        "configured": True,
+        "deepReads": deep_reads,
+        "dormantBooks": dormant_books,
+        "activeBooks": active_books,
+        "topics": topics,
+        "recommendation": recommendation,
+        "confidence": "high" if deep_reads else "low",
+    }
 
 
 def normalize_shelf(

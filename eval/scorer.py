@@ -22,6 +22,23 @@ def _score_sequence(case: ToolCallCase, trace: TurnTrace) -> bool | None:
     return actual_names == case.expected_tool_sequence
 
 
+def _score_answer_quality(case: ToolCallCase, trace: TurnTrace) -> bool | None:
+    """Check explicitly specified response-quality requirements.
+
+    This is intentionally deterministic: it makes an observed failure
+    reproducible without using an LLM as a judge for its own output.
+    """
+    if not case.required_answer_terms and not case.max_answer_term_occurrences:
+        return None
+    answer = trace.final_answer.casefold()
+    required_terms_present = all(term.casefold() in answer for term in case.required_answer_terms)
+    occurrence_limits_met = all(
+        answer.count(term.casefold()) <= maximum
+        for term, maximum in case.max_answer_term_occurrences.items()
+    )
+    return required_terms_present and occurrence_limits_met
+
+
 def score_case(case: ToolCallCase, trace: TurnTrace) -> dict[str, Any]:
     """Score one case against its trace. Only the FIRST tool call is judged
     against ``expected_tool``/``expected_args`` for the hard pass/fail
@@ -50,6 +67,7 @@ def score_case(case: ToolCallCase, trace: TurnTrace) -> dict[str, Any]:
         "invocation_correct": invocation_correct,
         "args_correct": args_correct,
         "sequence_correct": _score_sequence(case, trace),
+        "answer_quality_correct": _score_answer_quality(case, trace),
         "extra_tool_calls": len(trace.tool_calls) > (1 if case.expected_tool else 0),
         "final_answer": trace.final_answer,
         "stop_reason": trace.stop_reason,
@@ -88,6 +106,12 @@ def compute_metrics(scored_cases: list[dict[str, Any]]) -> dict[str, Any]:
         if sequence_cases
         else None
     )
+    answer_quality_cases = [c for c in scored_cases if c["answer_quality_correct"] is not None]
+    answer_quality_accuracy = (
+        sum(c["answer_quality_correct"] for c in answer_quality_cases) / len(answer_quality_cases)
+        if answer_quality_cases
+        else None
+    )
 
     return {
         "invocation_recall": recall,  # did it call the right tool when it should have
@@ -95,5 +119,6 @@ def compute_metrics(scored_cases: list[dict[str, Any]]) -> dict[str, Any]:
         "negative_case_accuracy": negative_correct_rate,  # did it correctly call NOTHING when nothing was needed
         "argument_accuracy": arg_accuracy,
         "sequence_accuracy": sequence_accuracy,  # for expected_tool_sequence cases only
+        "answer_quality_accuracy": answer_quality_accuracy,
         "total_cases": len(scored_cases),
     }

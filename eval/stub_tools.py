@@ -67,6 +67,53 @@ def _book_title_schema(*, required: bool) -> dict[str, Any]:
 
 _STUB_TOOL_SPECS: list[tuple[str, str, dict[str, Any], str]] = [
     (
+        "weread_topic_advisor",
+        "Build a topic-specific next-reading plan from the user's live WeRead shelf and notes. "
+        "It classifies deep reads and verified ebook candidates, removes books already owned and duplicate "
+        "editions, and indicates whether to use an advisor plan or beginner path. Use it instead of web search "
+        "or generic recommendations when the user asks what to read next about a topic.",
+        {
+            "type": "object",
+            "properties": {"keyword": {"type": "string", "description": "Topic to go deeper into."}},
+            "required": ["keyword"],
+        },
+        '''{
+          "topic": "product management",
+          "analysis": {"trueReads": [{"title": "The Mom Test", "notes": 9}, {"title": "Continuous Discovery Habits", "notes": 6}, {"title": "Escaping the Build Trap", "notes": 5}], "dormant": [], "shallow": [], "hiddenDeepReads": []},
+          "candidates": [
+            {"title": "Inspired", "author": "Marty Cagan", "deepLink": "weread://inspired"},
+            {"title": "Empowered", "author": "Marty Cagan", "deepLink": "weread://empowered"},
+            {"title": "Lean Analytics", "author": "Alistair Croll", "deepLink": "weread://lean-analytics"}
+          ],
+          "workflow": {"route": "advisor", "output": "Recommend only candidates. Connect each candidate to a gap in the user's live reading evidence; end with one best next book and a stretch pair."}
+        }''',
+    ),
+    (
+        "weread_author_recommendations",
+        "Build personalized recommendations for more books by a named author from the user's live "
+        "WeRead shelf and notes. It searches the ebook catalog, removes owned titles and duplicate "
+        "editions, and returns a profile plus grounded candidates. Use it instead of web search.",
+        {
+            "type": "object",
+            "properties": {
+                "keyword": {"type": "string", "description": "Author, title, or topic to search."},
+            },
+            "required": ["keyword"],
+        },
+        """{
+          "author": "Jane Austen",
+          "ownedBooks": [{"title": "Pride and Prejudice", "author": "Jane Austen"}],
+          "profile": {"deepReadTopics": ["Classics"], "deepReads": [{"title": "Pride and Prejudice", "notes": 6}], "activeBooks": ["Pride and Prejudice"]},
+          "candidates": [
+            {"title": "傲慢与偏见（英文原版）Pride and Prejudice", "author": "Jane Austen", "deepLink": "weread://translated-pride"},
+            {"title": "Emma", "author": "Jane Austen", "deepLink": "weread://emma"},
+            {"title": "Persuasion", "author": "Jane Austen", "deepLink": "weread://persuasion"},
+            {"title": "Sense and Sensibility", "author": "Jane Austen", "deepLink": "weread://sense"}
+          ],
+          "rules": {"response": "Recommend only listed candidates. Compare every candidate semantically with ownedBooks: translated or bilingual titles can represent the same work. Never recommend an edition or translation of an owned work. Explicitly mention one profile signal in a brief personalized rationale."}
+        }""",
+    ),
+    (
         "weread_shelf",
         "Fetch the user's current WeRead bookshelf (books currently reading, "
         "to-read, and finished). Always call this for shelf/bookshelf questions "

@@ -85,10 +85,41 @@ class ToolCallCase:
     # existing scoring still evaluates that first call correctly in the
     # meantime.
     expected_tools: list[str] | None = None
+    # Deterministic checks for the final response. They are deliberately
+    # narrow and case-specific: use them when an exact response-quality
+    # regression (such as duplicate book recommendations) is known.
+    required_answer_terms: list[str] = field(default_factory=list)
+    max_answer_term_occurrences: dict[str, int] = field(default_factory=dict)
 
 
 EVAL_CASES: list[ToolCallCase] = [
     # ---- Positive cases: one per registered tool ---------------------------
+    ToolCallCase(
+        id="topic_advisor_plan",
+        question=(
+            "I want to go deeper into product management. Recommend three books available in WeRead, "
+            "tailored to what I have already studied."
+        ),
+        expected_tool="weread_topic_advisor",
+        expected_args={"keyword": "product management"},
+        required_answer_terms=["Inspired", "Empowered", "Lean Analytics", "best next"],
+        notes=(
+            "A topic-specific request with explicit count and source constraints must use the advisor, "
+            "not a generic recommendation or web search. The final response must rely on distinct verified candidates."
+        ),
+    ),
+    ToolCallCase(
+        id="catalog_author_discovery",
+        question="I already own Pride and Prejudice. Recommend more books by Jane Austen.",
+        expected_tool="weread_author_recommendations",
+        expected_args={"keyword": "Jane Austen"},
+        required_answer_terms=["Emma", "Persuasion", "Sense and Sensibility", "classic"],
+        max_answer_term_occurrences={"Pride and Prejudice": 1},
+        notes=(
+            "Book discovery must prefer the WeRead ebook catalog over generic web search, "
+            "then recommend distinct alternatives instead of repeating the user's existing book."
+        ),
+    ),
     ToolCallCase(
         id="bookshelf_basic",
         question="what's on my bookshelf?",

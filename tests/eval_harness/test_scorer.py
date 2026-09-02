@@ -93,6 +93,36 @@ class TestScoreCase:
         scored = score_case(case, trace)
         assert scored["args_correct"] is None
 
+    def test_response_quality_detects_duplicate_recommendation_regression(self):
+        case = ToolCallCase(
+            id="c10b",
+            question="q",
+            expected_tool="weread_catalog_search",
+            required_answer_terms=["Emma", "Persuasion"],
+            max_answer_term_occurrences={"Pride and Prejudice": 1},
+        )
+        trace = _trace(
+            [{"name": "weread_catalog_search", "args": {}}],
+            final_answer="1. Pride and Prejudice\n2. Pride and Prejudice\n3. Emma\n4. Persuasion",
+        )
+
+        assert score_case(case, trace)["answer_quality_correct"] is False
+
+    def test_response_quality_accepts_unique_alternative_recommendations(self):
+        case = ToolCallCase(
+            id="c10c",
+            question="q",
+            expected_tool="weread_catalog_search",
+            required_answer_terms=["Emma", "Persuasion"],
+            max_answer_term_occurrences={"Pride and Prejudice": 1},
+        )
+        trace = _trace(
+            [{"name": "weread_catalog_search", "args": {}}],
+            final_answer="1. Emma\n2. Persuasion",
+        )
+
+        assert score_case(case, trace)["answer_quality_correct"] is True
+
 
 class TestScoreCaseSequence:
     """expected_tool_sequence adds a softer signal on top of the hard

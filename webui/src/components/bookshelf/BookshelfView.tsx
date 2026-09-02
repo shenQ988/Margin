@@ -2,7 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { BookCard } from "@/components/bookshelf/BookCard";
 import { NoteDetailView } from "@/components/notes/NoteDetailView";
-import { fetchWeReadShelf, fetchWeReadStatus, type WeReadShelfItem } from "@/lib/api";
+import {
+  fetchWeReadAdvisor,
+  fetchWeReadShelf,
+  fetchWeReadStatus,
+  type WeReadAdvisorPayload,
+  type WeReadShelfItem,
+} from "@/lib/api";
 import { useClient } from "@/providers/ClientProvider";
 
 type LoadState =
@@ -17,6 +23,8 @@ export function BookshelfView() {
   const { getToken } = useClient();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [filter, setFilter] = useState<StatusFilter>("all");
+  const [advisor, setAdvisor] = useState<WeReadAdvisorPayload | null>(null);
+  const [readingMapOpen, setReadingMapOpen] = useState(false);
   const [selected, setSelected] = useState<
     { bookId: string; title: string; deepLink: string | null } | null
   >(null);
@@ -29,8 +37,12 @@ export function BookshelfView() {
         setState({ status: "not-configured" });
         return;
       }
-      const shelf = await fetchWeReadShelf(getToken());
+      const [shelf, readingAdvisor] = await Promise.all([
+        fetchWeReadShelf(getToken()),
+        fetchWeReadAdvisor(getToken()).catch(() => null),
+      ]);
       setState({ status: "ready", items: shelf.items });
+      setAdvisor(readingAdvisor);
     } catch (e) {
       setState({ status: "error", message: e instanceof Error ? e.message : String(e) });
     }
@@ -69,6 +81,10 @@ export function BookshelfView() {
     );
   }
 
+  if (readingMapOpen && advisor) {
+    return <ReadingMapView advisor={advisor} onBack={() => setReadingMapOpen(false)} />;
+  }
+
   return (
     <>
       <div className="bookshelf-hero">
@@ -97,6 +113,8 @@ export function BookshelfView() {
           </button>
         </div>
       </header>
+
+      {advisor ? <AdvisorCard advisor={advisor} onOpen={() => setReadingMapOpen(true)} /> : null}
 
       {state.status === "loading" ? (
         <p style={{ textAlign: "center", fontSize: 14 }}>Loading your shelf...</p>
@@ -132,4 +150,109 @@ export function BookshelfView() {
       )}
     </>
   );
+}
+
+function AdvisorCard({ advisor, onOpen }: { advisor: WeReadAdvisorPayload; onOpen: () => void }) {
+  const recommendation = advisor.recommendation;
+  return (
+    <button type="button" className="advisor-card" aria-label="Open Reading Map" onClick={onOpen}>
+      <div className="advisor-card-heading">
+        <strong>Your Reading Map</strong>
+        <span>{advisor.confidence === "high" ? "Based on your notes" : "Getting to know you"}</span>
+      </div>
+      {advisor.topics.length ? (
+        <p>Deep-reading topics: {advisor.topics.map((topic) => topic.name).join(", ")}</p>
+      ) : null}
+      {recommendation ? (
+        <div className="advisor-recommendation">
+          <span>Read next</span>
+          <strong>{recommendation.title}</strong>
+          {recommendation.author ? <small>{recommendation.author}</small> : null}
+          <p>{recommendation.reason}</p>
+        </div>
+      ) : advisor.deepReads.length === 0 ? (
+        <p>Add highlights or notes to a few books and Margin will start finding reading patterns.</p>
+      ) : (
+        <p>We found your reading history. Open the map to see the books shaping it.</p>
+      )}
+      <span className="advisor-open-label">Open map →</span>
+    </button>
+  );
+}
+
+function ReadingMapView({ advisor, onBack }: { advisor: WeReadAdvisorPayload; onBack: () => void }) {
+  const route = buildReadingRoute(advisor);
+
+  return (
+    <main className="reading-map-view">
+      <header className="header reading-map-header">
+        <button type="button" className="header-btn" onClick={onBack}>Back</button>
+        <h1>Your Reading Map</h1>
+        <span className="reading-map-confidence">
+          {advisor.confidence === "high" ? "Based on your notes" : "Getting to know you"}
+        </span>
+      </header>
+
+      <section className="reading-path-section" aria-labelledby="reading-path-title">
+        <h2 id="reading-path-title">Your next reading path</h2>
+        <p>Follow the line upward: continue what is active, then revisit a fitting book.</p>
+        {route.length ? (
+          <ol className="reading-path">
+            {route.map((step, index) => (
+              <li key={step.book.bookId}>
+                <span className="reading-path-step">{index + 1}. {step.label}</span>
+                <strong>{step.book.title}</strong>
+                {step.book.author ? <span>{step.book.author}</span> : null}
+                <small>{step.detail}</small>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="reading-map-empty">Add a book to your shelf to start a reading path.</p>
+        )}
+      </section>
+
+      {advisor.topics.length || advisor.deepReads.length ? (
+        <section className="reading-map-section">
+          <h2>What this path builds on</h2>
+          {advisor.topics.length ? (
+            <div className="reading-map-topics">
+              {advisor.topics.map((topic) => (
+                <span key={topic.name}>{topic.name} · {topic.deepReadCount} book{topic.deepReadCount === 1 ? "" : "s"}</span>
+              ))}
+            </div>
+          ) : null}
+          {advisor.deepReads.length ? (
+            <p>Deep reads: {advisor.deepReads.map((book) => book.title).join(", ")}.</p>
+          ) : null}
+        </section>
+      ) : null}
+    </main>
+  );
+}
+
+function buildReadingRoute(advisor: WeReadAdvisorPayload) {
+  const seen = new Set<string>();
+  const route: Array<{
+    book: WeReadAdvisorPayload["deepReads"][number];
+    label: "Continue" | "Revisit" | "Read next";
+    detail: string;
+  }> = [];
+  const add = (
+    book: WeReadAdvisorPayload["deepReads"][number],
+    label: "Continue" | "Revisit" | "Read next",
+    detail: string,
+  ) => {
+    if (!seen.has(book.bookId)) {
+      seen.add(book.bookId);
+      route.push({ book, label, detail });
+    }
+  };
+
+  advisor.activeBooks.forEach((book) => add(book, "Continue", "Recently active"));
+  if (advisor.recommendation) {
+    add(advisor.recommendation, "Read next", advisor.recommendation.reason ?? "Matches your reading map");
+  }
+  advisor.dormantBooks.forEach((book) => add(book, "Revisit", "Ready for a fresh pass"));
+  return route;
 }

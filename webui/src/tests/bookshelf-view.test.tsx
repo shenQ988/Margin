@@ -12,6 +12,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     ...actual,
     fetchWeReadStatus: vi.fn(),
     fetchWeReadShelf: vi.fn(),
+    fetchWeReadAdvisor: vi.fn(),
     fetchWeReadBookNotes: vi.fn(),
   };
 });
@@ -29,7 +30,17 @@ describe("BookshelfView", () => {
   beforeEach(() => {
     vi.mocked(api.fetchWeReadStatus).mockReset();
     vi.mocked(api.fetchWeReadShelf).mockReset();
+    vi.mocked(api.fetchWeReadAdvisor).mockReset();
     vi.mocked(api.fetchWeReadBookNotes).mockReset();
+    vi.mocked(api.fetchWeReadAdvisor).mockResolvedValue({
+      configured: true,
+      deepReads: [],
+      dormantBooks: [],
+      activeBooks: [],
+      topics: [],
+      recommendation: null,
+      confidence: "low",
+    });
   });
 
   it("shows a not-configured empty state when WEREAD_API_KEY is unset", async () => {
@@ -64,6 +75,57 @@ describe("BookshelfView", () => {
     });
     renderView();
     await waitFor(() => expect(screen.getAllByText("三体").length).toBeGreaterThan(0));
+  });
+
+  it("shows an evidence-backed advisor recommendation when one is available", async () => {
+    vi.mocked(api.fetchWeReadStatus).mockResolvedValue({ configured: true });
+    vi.mocked(api.fetchWeReadShelf).mockResolvedValue({ configured: true, count: 0, items: [] });
+    vi.mocked(api.fetchWeReadAdvisor).mockResolvedValue({
+      configured: true,
+      deepReads: [{ bookId: "deep", title: "Inspired", author: null, category: "Product", notes: 12 }],
+      dormantBooks: [],
+      activeBooks: [],
+      topics: [{ name: "Product", deepReadCount: 1 }],
+      recommendation: {
+        bookId: "next",
+        title: "Continuous Discovery Habits",
+        author: "Teresa Torres",
+        category: "Product",
+        notes: 0,
+        reason: "It matches your strongest reading topic: Product.",
+      },
+      confidence: "high",
+    });
+
+    renderView();
+
+    await waitFor(() => expect(screen.getByText("Your Reading Map")).toBeInTheDocument());
+    expect(screen.getByText("Continuous Discovery Habits")).toBeInTheDocument();
+    expect(screen.getByText(/strongest reading topic: Product/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /open reading map/i }));
+    expect(screen.getByRole("heading", { name: "Your Reading Map" })).toBeInTheDocument();
+    expect(screen.getByText("Your next reading path")).toBeInTheDocument();
+    expect(screen.getByText(/1\. Read next/i)).toBeInTheDocument();
+  });
+
+  it("explains sparse Reading Map data instead of rendering only its heading", async () => {
+    vi.mocked(api.fetchWeReadStatus).mockResolvedValue({ configured: true });
+    vi.mocked(api.fetchWeReadShelf).mockResolvedValue({ configured: true, count: 0, items: [] });
+    vi.mocked(api.fetchWeReadAdvisor).mockResolvedValue({
+      configured: true,
+      deepReads: [{ bookId: "deep", title: "A Book", author: null, category: null, notes: 6 }],
+      dormantBooks: [],
+      activeBooks: [],
+      topics: [],
+      recommendation: null,
+      confidence: "high",
+    });
+
+    renderView();
+
+    await waitFor(() => expect(screen.getByText(/we found your reading history/i)).toBeInTheDocument());
+    expect(screen.getByText("Open map →")).toBeInTheDocument();
   });
 
   it("shows an error state with a retry button on failure", async () => {
