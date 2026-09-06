@@ -19,12 +19,25 @@ type LoadState =
 
 type StatusFilter = "all" | "reading" | "toread" | "finished";
 
-export function BookshelfView() {
+const EMPTY_READING_MAP: WeReadAdvisorPayload = {
+  configured: true,
+  deepReads: [],
+  dormantBooks: [],
+  activeBooks: [],
+  topics: [],
+  recommendation: null,
+  confidence: "low",
+};
+
+export function BookshelfView({ mapOnly = false }: { mapOnly?: boolean } = {}) {
   const { getToken } = useClient();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [advisor, setAdvisor] = useState<WeReadAdvisorPayload | null>(null);
-  const [readingMapOpen, setReadingMapOpen] = useState(false);
+  const [readingMapOpen, setReadingMapOpen] = useState(mapOnly);
+  const [topic, setTopic] = useState("");
+  const [mapLoading, setMapLoading] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const [selected, setSelected] = useState<
     { bookId: string; title: string; deepLink: string | null } | null
   >(null);
@@ -70,6 +83,23 @@ export function BookshelfView() {
     }
   }, []);
 
+  const generateMap = useCallback(async () => {
+    const requestedTopic = topic.trim();
+    if (!requestedTopic) {
+      setMapError("Enter a topic before generating a map.");
+      return;
+    }
+    setMapLoading(true);
+    setMapError(null);
+    try {
+      setAdvisor(await fetchWeReadAdvisor(getToken(), "", requestedTopic));
+    } catch (error) {
+      setMapError(error instanceof Error ? error.message : "Could not generate the reading map.");
+    } finally {
+      setMapLoading(false);
+    }
+  }, [getToken, topic]);
+
   if (selected) {
     return (
       <NoteDetailView
@@ -81,8 +111,20 @@ export function BookshelfView() {
     );
   }
 
-  if (readingMapOpen && advisor) {
-    return <ReadingMapView advisor={advisor} onBack={() => setReadingMapOpen(false)} />;
+  // The Reading Map is its own tab. Do not fall through to the shelf while
+  // the initial advisor request is pending or unavailable.
+  if (readingMapOpen && (advisor || mapOnly)) {
+    return (
+      <ReadingMapView
+        advisor={advisor ?? EMPTY_READING_MAP}
+        topic={topic}
+        onTopicChange={setTopic}
+        onGenerate={generateMap}
+        isGenerating={mapLoading}
+        error={mapError}
+        onBack={mapOnly ? undefined : () => setReadingMapOpen(false)}
+      />
+    );
   }
 
   return (
@@ -114,7 +156,7 @@ export function BookshelfView() {
         </div>
       </header>
 
-      {advisor ? <AdvisorCard advisor={advisor} onOpen={() => setReadingMapOpen(true)} /> : null}
+      {!mapOnly && advisor ? <AdvisorCard advisor={advisor} onOpen={() => setReadingMapOpen(true)} /> : null}
 
       {state.status === "loading" ? (
         <p style={{ textAlign: "center", fontSize: 14 }}>Loading your shelf...</p>
@@ -180,75 +222,49 @@ function AdvisorCard({ advisor, onOpen }: { advisor: WeReadAdvisorPayload; onOpe
   );
 }
 
-function ReadingMapView({ advisor, onBack }: { advisor: WeReadAdvisorPayload; onBack: () => void }) {
-  const route = buildReadingRoute(advisor);
-
+function ReadingMapView({ advisor, topic, onTopicChange, onGenerate, isGenerating, error, onBack }: { advisor: WeReadAdvisorPayload; topic: string; onTopicChange: (value: string) => void; onGenerate: () => void; isGenerating: boolean; error: string | null; onBack?: () => void }) {
   return (
     <main className="reading-map-view">
       <header className="header reading-map-header">
-        <button type="button" className="header-btn" onClick={onBack}>Back</button>
+        {onBack ? <button type="button" className="header-btn" onClick={onBack}>Back</button> : <span />}
         <h1>Your Reading Map</h1>
         <span className="reading-map-confidence">
           {advisor.confidence === "high" ? "Based on your notes" : "Getting to know you"}
         </span>
       </header>
 
-      <section className="reading-map-section" aria-labelledby="reading-path-title">
-        <h2 id="reading-path-title">Deep reads</h2><p>Books with five or more notes, highlights, or bookmarks.</p>
-        <ReadingMapBookList books={advisor.deepReads} />
-      </section>
-      <section className="reading-map-section"><h2>Currently reading</h2><p>Unfinished books opened recently.</p>
-        <ReadingMapBookList books={advisor.activeBooks} />
-      </section>
-      <section className="reading-map-section"><h2>Ready to revisit</h2><p>Books without recent activity or notes.</p>
-        <ReadingMapBookList books={route.filter((step) => step.label === "Revisit").map((step) => step.book)} />
+      <section className="reading-map-section">
+        <h2>Explore a topic</h2>
+        <p>Enter a topic to generate a map from your related WeRead activity.</p>
+        <form className="reading-map-topic-form" onSubmit={(event) => { event.preventDefault(); onGenerate(); }}>
+          <input value={topic} onChange={(event) => onTopicChange(event.target.value)} placeholder="e.g. product management" aria-label="Topic to explore" />
+          <button type="submit" className="header-btn" disabled={isGenerating}>{isGenerating ? "Generating…" : "Generate map"}</button>
+        </form>
+        {error ? <p className="reading-map-error" role="alert">{error}</p> : null}
       </section>
 
-      {advisor.topics.length || advisor.deepReads.length ? (
+      {advisor.suggestedBooks?.length ? (
         <section className="reading-map-section">
-          <h2>What this path builds on</h2>
-          {advisor.topics.length ? (
-            <div className="reading-map-topics">
-              {advisor.topics.map((topic) => (
-                <span key={topic.name}>{topic.name} · {topic.deepReadCount} book{topic.deepReadCount === 1 ? "" : "s"}</span>
-              ))}
-            </div>
-          ) : null}
-          {advisor.deepReads.length ? (
-            <p>Deep reads: {advisor.deepReads.map((book) => book.title).join(", ")}.</p>
-          ) : null}
+          <h2>Your suggested path</h2>
+          <p>A three-step sequence from the live WeRead catalog for {topic}.</p>
+          <ol className="reading-map-suggestions">
+            {advisor.suggestedBooks.map((book) => (
+              <li key={book.bookId}>
+                <span className="reading-map-level">Step {book.step} of 3 · {book.level}</span>
+                <strong>{book.title}</strong>
+                <span>{book.author ?? "Unknown author"}{book.category ? ` · ${book.category}` : ""}</span>
+                <p>{book.reason}</p>
+                {book.deepLink ? <a href={book.deepLink} target="_blank" rel="noreferrer">Open in WeRead</a> : null}
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : topic.trim() && !isGenerating ? (
+        <section className="reading-map-section">
+          <h2>No path yet</h2>
+          <p>WeRead did not return eligible books for this topic. Try a shorter or more specific topic.</p>
         </section>
       ) : null}
     </main>
   );
-}
-
-function ReadingMapBookList({ books }: { books: WeReadAdvisorPayload["deepReads"] }) {
-  return books.length ? <ul className="reading-map-book-list">{books.map((book) => <li key={book.bookId}><strong>{book.title}</strong><span>{book.author ?? "Unknown author"}</span><small>{book.noteCount ?? 0} notes</small></li>)}</ul> : <p className="reading-map-empty">Nothing here yet.</p>;
-}
-
-function buildReadingRoute(advisor: WeReadAdvisorPayload) {
-  const seen = new Set<string>();
-  const route: Array<{
-    book: WeReadAdvisorPayload["deepReads"][number];
-    label: "Continue" | "Revisit" | "Read next";
-    detail: string;
-  }> = [];
-  const add = (
-    book: WeReadAdvisorPayload["deepReads"][number],
-    label: "Continue" | "Revisit" | "Read next",
-    detail: string,
-  ) => {
-    if (!seen.has(book.bookId)) {
-      seen.add(book.bookId);
-      route.push({ book, label, detail });
-    }
-  };
-
-  advisor.activeBooks.forEach((book) => add(book, "Continue", "Recently active"));
-  if (advisor.recommendation) {
-    add(advisor.recommendation, "Read next", advisor.recommendation.reason ?? "Matches your reading map");
-  }
-  advisor.dormantBooks.forEach((book) => add(book, "Revisit", "Ready for a fresh pass"));
-  return route;
 }

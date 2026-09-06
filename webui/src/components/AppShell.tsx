@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 
 import { BookshelfView } from "@/components/bookshelf/BookshelfView";
-import { ChatTabView } from "@/components/chat/ChatTabView";
 import { NotesView } from "@/components/notes/NotesView";
 import { SettingsView } from "@/components/settings/SettingsView";
 import { cn } from "@/lib/utils";
 
-type Tab = "shelf" | "notes" | "ask-book" | "settings";
+type Tab = "shelf" | "notes" | "reading-map" | "settings";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "shelf", label: "Shelf" },
   { id: "notes", label: "Notes" },
-  { id: "ask-book", label: "Ask-Book" },
+  { id: "reading-map", label: "Reading Map" },
   { id: "settings", label: "Setting" },
 ];
 
@@ -35,6 +34,8 @@ export function AppShell({
   onToggleTheme: () => void;
   onLogout: () => void;
 }) {
+  void theme;
+  void onToggleTheme;
   const [tab, setTab] = useState<Tab>(readTab);
   const [visited, setVisited] = useState<Set<Tab>>(() => new Set([readTab()]));
 
@@ -72,9 +73,10 @@ export function AppShell({
           <NotesView />
         </Pane>
       ) : null}
-      <Pane active={tab === "ask-book"} bottomClearance>
-        <ChatTabView theme={theme} onToggleTheme={onToggleTheme} />
+      {visited.has("reading-map") ? <Pane active={tab === "reading-map"} scrollable>
+        <BookshelfView mapOnly />
       </Pane>
+      : null}
       {visited.has("settings") ? (
         <Pane active={tab === "settings"} scrollable>
           <SettingsView onLogout={onLogout} />

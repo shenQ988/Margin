@@ -10,6 +10,8 @@ Margin is designed for one focused workflow: helping a reader decide what to stu
 
 <img src="rsc/poster.png" alt="Margin poster" width="520" />
 
+<img src="rsc/map_poster.png" alt="Margin Reading Map" width="520" />
+
 ```text
 User
  │

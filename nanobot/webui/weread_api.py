@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import time
 from typing import Any, cast
 
@@ -32,6 +33,12 @@ _NOTEBOOKS_TIMEOUT_S = 6.0
 _PROGRESS_TIMEOUT_S = 5.0
 _DEEP_READ_NOTE_COUNT = 5
 _ACTIVE_READING_DAYS = 30
+_MAP_LEVELS = ("Beginner", "Intermediate", "Advanced")
+_MAP_REASONS = (
+    "Start here to establish the core vocabulary and questions for this topic.",
+    "Read this next to build on the foundation with a second perspective.",
+    "Use this after the earlier steps to deepen or challenge the ideas you have met.",
+)
 
 
 def weread_configured() -> bool:
@@ -103,14 +110,89 @@ async def fetch_shelf_enriched() -> dict[str, Any]:
     return normalize_shelf(shelf_payload, note_book_ids=note_book_ids, progress_by_book_id=progress_by_book_id)
 
 
-async def fetch_advisor() -> dict[str, Any]:
+async def fetch_advisor(topic: str | None = None) -> dict[str, Any]:
     """Build a fresh, non-persistent reading profile for the advisor UI."""
     api_key = os.environ.get("WEREAD_API_KEY") or ""
-    shelf_payload, notebooks_payload = await asyncio.gather(
+    requested_topic = topic.strip() if topic else ""
+    requests = [
         call_weread_api(api_key, "/shelf/sync"),
         _fetch_notebooks_raw(api_key),
-    )
-    return build_reading_profile(shelf_payload, notebooks_payload)
+    ]
+    if requested_topic:
+        # These calls are independent. Keeping catalog search parallel with
+        # shelf/profile retrieval prevents a slow WeRead response from making
+        # the browser abandon the HTTP-over-WebSocket request.
+        requests.append(call_weread_api(api_key, "/store/search", keyword=requested_topic, scope=10))
+    results = await asyncio.gather(*requests)
+    shelf_payload = cast(dict[str, Any], results[0])
+    notebooks_payload = cast(dict[str, Any], results[1])
+    profile = build_reading_profile(shelf_payload, notebooks_payload)
+    if not requested_topic:
+        return profile
+    words = [word for word in requested_topic.casefold().split() if word]
+
+    def matches(book: dict[str, Any]) -> bool:
+        searchable = f"{book.get('title', '')} {book.get('category', '')}".casefold()
+        return any(word in searchable for word in words)
+    for key in ("deepReads", "dormantBooks", "activeBooks"):
+        profile[key] = [book for book in profile[key] if matches(cast(dict[str, Any], book))]
+    profile["topics"] = [item for item in profile["topics"] if matches(cast(dict[str, Any], item))]
+    profile["recommendation"] = next(iter(profile["dormantBooks"]), None)
+    profile["topic"] = requested_topic
+    catalog = cast(dict[str, Any], results[2])
+    profile["suggestedBooks"] = _build_topic_suggestions(catalog, shelf_payload, requested_topic)
+    return profile
+
+
+def _normalise_map_title(value: object) -> str:
+    title = re.sub(r"[（(][^（）()]*[）)]", "", str(value or ""))
+    return re.sub(r"[^\w]+", "", title.casefold())
+
+
+def _build_topic_suggestions(
+    catalog: dict[str, Any], shelf_payload: dict[str, Any], topic: str
+) -> list[dict[str, Any]]:
+    """Return a short, de-duplicated three-step path from live catalog results."""
+    shelf_books = cast(list[dict[str, Any]], shelf_payload.get("books") or [])
+    owned_ids = {str(book.get("bookId")) for book in shelf_books if book.get("bookId") is not None}
+    owned_titles = [_normalise_map_title(book.get("title")) for book in shelf_books]
+    candidates: list[dict[str, Any]] = []
+    seen_titles: set[str] = set()
+
+    for group in cast(list[dict[str, Any]], catalog.get("results") or []):
+        for result in cast(list[dict[str, Any]], group.get("books") or []):
+            info = cast(dict[str, Any], result.get("bookInfo") or result)
+            title = str(info.get("title") or "").strip()
+            canonical_title = _normalise_map_title(title)
+            book_id = str(info.get("bookId") or "")
+            is_owned_edition = any(
+                len(owned_title) >= 8
+                and (owned_title in canonical_title or canonical_title in owned_title)
+                for owned_title in owned_titles
+            )
+            if not title or canonical_title in seen_titles or book_id in owned_ids or is_owned_edition:
+                continue
+            seen_titles.add(canonical_title)
+            candidates.append(
+                {
+                    "bookId": book_id,
+                    "title": title,
+                    "author": info.get("author") or None,
+                    "category": info.get("category") or None,
+                    "deepLink": info.get("deepLink") or None,
+                }
+            )
+
+    return [
+        {
+            **book,
+            "step": index,
+            "level": _MAP_LEVELS[index - 1],
+            "reason": _MAP_REASONS[index - 1],
+            "topic": topic,
+        }
+        for index, book in enumerate(candidates[: len(_MAP_LEVELS)], start=1)
+    ]
 
 
 def _count(value: Any) -> int:

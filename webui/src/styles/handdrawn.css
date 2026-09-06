@@ -396,6 +396,52 @@
   font-style: italic;
 }
 
+.reading-map-topic-form { display: flex; gap: 8px; margin-top: 12px; }
+.reading-map-topic-form input { min-width: 0; flex: 1; padding: 9px 10px; border: 2px solid var(--crayon-black); border-radius: 8px; background: var(--cream-bg); font: inherit; }
+
+.reading-map-suggestions {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 12px 0 0;
+  list-style: none;
+}
+
+.reading-map-suggestions li {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 2px solid var(--crayon-black);
+  border-radius: 9px;
+  background: var(--cream-bg);
+}
+
+.reading-map-level {
+  color: rgba(34, 34, 34, 0.68);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.reading-map-suggestions li > span:not(.reading-map-level) {
+  color: rgba(34, 34, 34, 0.68);
+  font-size: 13px;
+}
+
+.reading-map-suggestions p {
+  margin: 3px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.reading-map-suggestions a {
+  width: fit-content;
+  margin-top: 3px;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 /* 可点击书本卡片 封面 + 标题 */
 .book-card {
   display: flex;

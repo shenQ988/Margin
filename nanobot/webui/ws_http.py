@@ -1120,7 +1120,8 @@ class GatewayHTTPHandler:
         if not self.check_api_token(request):
             return _http_error(401, "Unauthorized")
         try:
-            return _http_json_response(await fetch_advisor())
+            topic = _query_first(_parse_query(request.path), "topic")
+            return _http_json_response(await fetch_advisor(topic))
         except WeReadError as exc:
             return _http_error(exc.status, exc.message)
         except Exception:

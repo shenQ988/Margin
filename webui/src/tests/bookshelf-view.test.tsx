@@ -26,6 +26,15 @@ function renderView() {
   );
 }
 
+function renderReadingMap() {
+  const client = { newChat: vi.fn() } as unknown as NanobotClient;
+  return render(
+    <ClientProvider client={client} token="tok">
+      <BookshelfView mapOnly />
+    </ClientProvider>,
+  );
+}
+
 describe("BookshelfView", () => {
   beforeEach(() => {
     vi.mocked(api.fetchWeReadStatus).mockReset();
@@ -48,6 +57,18 @@ describe("BookshelfView", () => {
     renderView();
     await waitFor(() => expect(screen.getByText(/not connected/i)).toBeInTheDocument());
     expect(api.fetchWeReadShelf).not.toHaveBeenCalled();
+  });
+
+  it("keeps the Reading Map tab on the map when the initial advisor request fails", async () => {
+    vi.mocked(api.fetchWeReadStatus).mockResolvedValue({ configured: true });
+    vi.mocked(api.fetchWeReadShelf).mockResolvedValue({ configured: true, count: 0, items: [] });
+    vi.mocked(api.fetchWeReadAdvisor).mockRejectedValue(new Error("advisor unavailable"));
+
+    renderReadingMap();
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Your Reading Map" })).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: /generate map/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "My Shelf" })).not.toBeInTheDocument();
   });
 
   it("renders the shelf grid when configured", async () => {
@@ -105,8 +126,8 @@ describe("BookshelfView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /open reading map/i }));
     expect(screen.getByRole("heading", { name: "Your Reading Map" })).toBeInTheDocument();
-    expect(screen.getByText("Your next reading path")).toBeInTheDocument();
-    expect(screen.getByText(/1\. Read next/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Explore a topic" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Deep reads" })).not.toBeInTheDocument();
   });
 
   it("explains sparse Reading Map data instead of rendering only its heading", async () => {
