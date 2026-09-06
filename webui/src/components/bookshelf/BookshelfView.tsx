@@ -193,23 +193,15 @@ function ReadingMapView({ advisor, onBack }: { advisor: WeReadAdvisorPayload; on
         </span>
       </header>
 
-      <section className="reading-path-section" aria-labelledby="reading-path-title">
-        <h2 id="reading-path-title">Your next reading path</h2>
-        <p>Follow the line upward: continue what is active, then revisit a fitting book.</p>
-        {route.length ? (
-          <ol className="reading-path">
-            {route.map((step, index) => (
-              <li key={step.book.bookId}>
-                <span className="reading-path-step">{index + 1}. {step.label}</span>
-                <strong>{step.book.title}</strong>
-                {step.book.author ? <span>{step.book.author}</span> : null}
-                <small>{step.detail}</small>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="reading-map-empty">Add a book to your shelf to start a reading path.</p>
-        )}
+      <section className="reading-map-section" aria-labelledby="reading-path-title">
+        <h2 id="reading-path-title">Deep reads</h2><p>Books with five or more notes, highlights, or bookmarks.</p>
+        <ReadingMapBookList books={advisor.deepReads} />
+      </section>
+      <section className="reading-map-section"><h2>Currently reading</h2><p>Unfinished books opened recently.</p>
+        <ReadingMapBookList books={advisor.activeBooks} />
+      </section>
+      <section className="reading-map-section"><h2>Ready to revisit</h2><p>Books without recent activity or notes.</p>
+        <ReadingMapBookList books={route.filter((step) => step.label === "Revisit").map((step) => step.book)} />
       </section>
 
       {advisor.topics.length || advisor.deepReads.length ? (
@@ -229,6 +221,10 @@ function ReadingMapView({ advisor, onBack }: { advisor: WeReadAdvisorPayload; on
       ) : null}
     </main>
   );
+}
+
+function ReadingMapBookList({ books }: { books: WeReadAdvisorPayload["deepReads"] }) {
+  return books.length ? <ul className="reading-map-book-list">{books.map((book) => <li key={book.bookId}><strong>{book.title}</strong><span>{book.author ?? "Unknown author"}</span><small>{book.noteCount ?? 0} notes</small></li>)}</ul> : <p className="reading-map-empty">Nothing here yet.</p>;
 }
 
 function buildReadingRoute(advisor: WeReadAdvisorPayload) {
