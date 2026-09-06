@@ -8,7 +8,7 @@ Generic chatbots can offer one-off book lists, but they lack a reliable view of 
 
 Margin is designed for one focused workflow: helping a reader decide what to study next. It combines persistent context about the reader’s goals, conceptual gaps, and preferences with live WeRead data about their shelf, notes, progress, and catalog availability. The result is a small, grounded reading plan: what to read next, why it fits the reader’s current path, and what gap it helps fill.
 
-<img src="rsc/poster.png" alt="Margin poster" width="720" />
+<img src="rsc/poster.png" alt="Margin poster" width="520" />
 
 ```text
 User
@@ -31,7 +31,7 @@ WeRead Tools   Conversation History
                        │
                        └──► Future agent context
 ```
-# Architecture
+## Architecture
 
 - Agent loop: Incoming WebSocket or channel messages are placed on an async message bus. AgentLoop resolves the session, builds prompt context, and delegates model/tool iterations to AgentRunner. Tool results are appended to the active session before the model produces the final response.
 
