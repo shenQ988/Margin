@@ -8,9 +8,9 @@ Generic chatbots can offer one-off book lists, but they lack a reliable view of 
 
 Margin is designed for one focused workflow: helping a reader decide what to study next. It combines persistent context about the reader’s goals, conceptual gaps, and preferences with live WeRead data about their shelf, notes, progress, and catalog availability. The result is a small, grounded reading plan: what to read next, why it fits the reader’s current path, and what gap it helps fill.
 
-<img src="rsc/poster.png" alt="Margin poster" width="520" />
+<img src="https://raw.githubusercontent.com/shenQ988/Margin/main/rsc/poster.png" alt="Margin poster" width="520" />
 
-<img src="rsc/map_poster.png" alt="Margin Reading Map" width="520" />
+<img src="https://raw.githubusercontent.com/shenQ988/Margin/main/rsc/map_poster.png" alt="Margin Reading Map" width="520" />
 
 ```text
 User
